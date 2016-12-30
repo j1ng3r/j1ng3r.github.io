@@ -1,0 +1,60 @@
+<!DocType Html>
+<html>
+<head>
+	<script>
+		function d(id){return document.getElementById(id);}
+		var storage={
+			jm:0,
+			mc:0,
+			cj:0
+		},
+		temp={
+			jm:0,
+			mc:0,
+			cj:0
+		},
+		_=new Proxy({},{get(a,b){
+			e(b,temp[b]+1);
+		}}),
+		$=new Proxy({},{get(a,b){
+			e(b,temp[b]-1);
+		}}),
+		S=new Proxy({},{get(a,b){
+			c(b,temp[b]);
+			e(b,0);
+		}});
+		window.onload=function(){
+			for(var i in storage)
+				d(i).innerHTML=storage[i]=+localStorage.getItem(i)||0;
+		};
+		function c(i,v){localStorage.setItem(i,d(i).innerHTML=storage[i]+=v);}
+		function e(b,v){d(b.toUpperCase()).innerHTML=temp[b]=v;}
+		function s(){
+			var min=Infinity,i;
+			for(i in storage)
+				min=Math.min(min,storage[i]);
+			for(i in storage)
+				c(i,-min);
+		}
+	</script>
+</head>
+<body>
+<strong>Stock Counter</strong><br><br>
+Joshua vs Marcus: <span id="jm">0</span>. Adding <span id="JM">0</span><button onclick="_.jm">+</button><button onclick="$.jm">-</button><button onclick="S.jm">Confirm</button><br>
+Marcus vs Cole:   <span id="mc">0</span>. Adding <span id="MC">0</span><button onclick="_.mc">+</button><button onclick="$.mc">-</button><button onclick="S.mc">Confirm</button><br>
+Cole vs Joshua:   <span id="cj">0</span>. Adding <span id="CJ">0</span><button onclick="_.cj">+</button><button onclick="$.cj">-</button><button onclick="S.cj">Confirm</button><br>
+<button onclick="s()">Simplify</button>
+</body>
+</html>
+
+<!--
+	en.mozer.io
+	Very cool
+	Free
+	Coding through gaming
+	like untrusted, but much better
+	show to kaelyn
+	Contact:
+		Satoshi
+		miyagawa@lifeistech.com
+-->
