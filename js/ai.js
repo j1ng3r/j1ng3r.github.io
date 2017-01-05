@@ -31,13 +31,6 @@ window.AI=function(){
         }
     });
     Object.assign(Gene.prototype,{
-    	/*mutateNumber(num){
-    		if(this.mut<Math.rand())
-    			return num;
-    		if(Math.rand()<this.reset)
-    			return Math.rand(this.min,this.maxGene);
-    		return num+Math.rand(-this.geneVar,this.geneVar);
-    	},*/
     	clone(THIS){
     		var P=this.properties,_=new Gene(P),i=Object.keys(this.data)[0];
             function p(g){
@@ -79,11 +72,26 @@ window.AI=function(){
                     g.push(genes[Math.floor(Math.rand(num))]);
                 return g;
             }
+        },
+        getResult(genes){
+            var ret=[],i,j,a;
+            for(i in genes){
+                a=genes[i].cost+":";
+                for(j in genes[i].data){
+                    a+=`\n\t${j}=${genes[i].data[j]}`;
+                }
+                ret.push(a);
+            }
+            return ret;
         }
     });
     Object.assign(AI.prototype,{
         addGeneName(n){
             if(!this.geneNames.includes(n))this.geneNames.push(n);
+            return this;
+        },
+        defineArguments(...a){
+            this.defineGeneNames(a).simulation.args=a;
             return this;
         },
         defineGeneNames(...a){
@@ -115,11 +123,19 @@ window.AI=function(){
         },
         defineCostFunction(sim,args){
             this.simulation.func=sim;
-            this.simulation.args=args;
+            Object.defaultSetThat(this.simulation,"args",args);
             return this;
         },
-        defineCompletionFunction(func){
-            this.simulation.return=func;
+        defineCompletionFunction(func,sub){
+            if(typeof func=="string"){
+                if(func=="return"){
+                    this.simulation.return=typeof sub=="function"?(
+                        genes=>sub(AI.getResult(genes))
+                    ):genes=>AI.getResult(genes);
+                }
+            } else if(typeof func=="function"){
+                this.simulation.return=func;
+            }
             return this;
         },
         defineGeneProperties(all,specific){
@@ -136,9 +152,12 @@ window.AI=function(){
                 this.genes.push(Gene.makeNew(this.geneProp));
             return this;
         },
-        _defineGeneProperties(p,i,g){
+        _defineGeneProperties(p,i,g,s){
             p=this.geneProperties;
             this.geneProp={};
+            s=a=>{
+                return isNaN(g[a+"Val"])&&isNaN(g[a+"ValSoft"]);
+            };
             for(i of this.geneNames){
                 this.geneProp[i]=Object.assign({},p.all,p.specific[i]);
                 if(this.geneProp[i].hasOwnProperty("array")){
@@ -153,10 +172,7 @@ window.AI=function(){
                     }(this.geneProp[i]);
                 }
                 g=this.geneProp[i];
-                function b(a){
-                    return isNaN(g[a+"Val"])&&isNaN(g[a+"ValSoft"]);
-                }
-                if(b('max')||b('min'))throw new RangeError("Please define the value range before executing.");
+                if(s('max')||s('min'))throw new RangeError("Please define the value range before executing.");
                 Object.defaultSetThis(this.geneProp[i],{
                     minValSoft:this.geneProp[i].minVal,
                     maxValSoft:this.geneProp[i].maxVal,
@@ -174,10 +190,11 @@ window.AI=function(){
                     get(o,k,p){return o.genes[k].clone.apply(o.genes[k],[o]);}
                 }),this.geneCount);
                 for(var j in this.genes){
-                    var args=[],gene=this.genes[j];
+                    var args=[],gene=this.genes[j],val;
                     for(var k of this.simulation.args)
                         args.push(Number.eval(gene.properties[k].returnFunc,gene.data[k]));
-                    gene.cost=this.simulation.func.apply({},args);
+                    val=this.simulation.func.apply({},args);
+                    gene.cost=isNaN(val)?Infinity:val;
                 }
                 this.genes.sort(function(a,b){return a.cost-b.cost;});
             }

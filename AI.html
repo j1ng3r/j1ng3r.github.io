@@ -1,0 +1,33 @@
+<!DocType Html>
+<html>
+    <head>
+        <script src="js/expand.js"></script>
+        <!--<script src="js/console.js"></script>-->
+        <script src="js/ai.js"></script>
+        <script>
+
+(new AI)
+    .defineGeneCount(50)
+    .defineIterations(500)
+    .defineArguments("x","y")
+    .defineCostFunction(function(x,y){
+        var z=Math.sqrt(x*x+y*y);
+        return(4+Math.tanh(x))*Math.exp(z-z*z)*Math.sqrt(1-z*z)*z*z*Math.sin(x*y);
+    })
+    .defineReproduction("linear")
+    .defineCompletionFunction("return",console.log)
+    .defineGeneProperties({
+        makeNewProb:0.01,
+        mutProb:0.4,
+        resetProb:0.1,
+        maxVal:1,
+        minVal:-1,
+        maxMut:0.05,
+        returnFunc:_=>_
+    })
+    .execute()
+;
+
+        </script>
+    </head>
+</html>
