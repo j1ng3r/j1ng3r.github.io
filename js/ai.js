@@ -82,7 +82,7 @@ window.AI=function(){
                 }
                 ret.push(a);
             }
-            return ret;
+            return ret.join('\n');
         }
     });
     Object.assign(AI.prototype,{
@@ -100,7 +100,7 @@ window.AI=function(){
             return this;
         },
         defineType(t){
-            this.type=t.toString();
+            this.type=t+"";
             return this;
         },
         defineGeneCount(n){
@@ -146,9 +146,9 @@ window.AI=function(){
             }
             return this;
         },
-        _createNewGenes(){
+        _createNewGenes(_,j,i){
             this.genes=[];
-            for(var _,j,i=0;i<this.geneCount;i++)
+            for(i=0;i<this.geneCount;i++)
                 this.genes.push(Gene.makeNew(this.geneProp));
             return this;
         },

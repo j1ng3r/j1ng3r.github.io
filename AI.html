@@ -18,11 +18,11 @@
     .defineCompletionFunction("return",console.log)
     .defineGeneProperties({
         makeNewProb:0.01,
-        mutProb:0.4,
+        mutProb:0.7,
         resetProb:0.1,
         maxVal:1,
         minVal:-1,
-        maxMut:0.05,
+        maxMut:function(ai){return 1/Math.sq(ai.iterations+0.1);},
         returnFunc:_=>_
     })
     .execute()
