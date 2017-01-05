@@ -123,7 +123,7 @@ window.AI=function(){
         },
         defineCostFunction(sim,args){
             this.simulation.func=sim;
-            Object.defaultSetThat(this.simulation,"args",args);
+            Object.defaultSetThat(this.simulation,{args:args});
             return this;
         },
         defineCompletionFunction(func,sub){
