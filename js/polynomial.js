@@ -5,6 +5,7 @@ function Polynomial(func,a,b,i){
         for(i=0;i<b;i++)
             this.list.push(new Fraction(i<a?0:func(i)));
     } else if(typeof func=="object"){
+        if(func instanceof Polynomial){func=func.list;}
         for(i in func)
             this.list.push(new Fraction(func[i]));
     } else this.list=[new Fraction(func)];
@@ -38,6 +39,7 @@ Object.assign(Polynomial.prototype,{
         return this;
     },
     mul(p){
+        p=new Polynomial(p);
         var n=[],i,j;
         for(i in p.list)
             for(j in this.list)
@@ -50,10 +52,19 @@ Object.assign(Polynomial.prototype,{
         this.list=d.list;
         return this;
     },
+    sq(){
+        return this.mul(this);
+    },
     substitute(p){
         var n=new Polynomial;
         for(var i in this.list)
             n.add(p.new().pow(+i).mul(this.list[i]));
         return n;
+    },
+    toString(){
+        for(var i=1,t=this.list[0].toString();i<this.list.length;i++){
+            t+=` + ${this.list[i].toString()}x^${i}`;
+        }
+        return t;
     }
 });
