@@ -7,11 +7,18 @@ function step(){
         player.endStep();
         chunkify();
 	} else {
-        if(pad.getInput("start")){
+        if(pad.getNewInput("start")){
             player.setup();
-            for(var i=0;i<20;i++)addChunk(0);
-            chunkify();
+            if(!+localStorage.getItem("willKeep")){
+                Block.last_X=-10;
+                Block.last_Y=-1;
+                Block.all=[];
+                for(var i=0;i<20;i++)addChunk(0);
+                chunkify();
+            }
         }
+        if(pad.getNewInput("state"))
+            localStorage.setItem("willKeep",1-localStorage.getItem("willKeep"));
 	}
     pad.endStep();
 	camera.setCamera(player.pos.x-camera.c.width/4,player.pos.y-camera.c.height/3);

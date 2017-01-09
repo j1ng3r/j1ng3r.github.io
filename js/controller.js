@@ -46,8 +46,10 @@ window.Controller=function(){
 			scheme:{},
 			_activate(a,v){
 				for(var i in this.scheme)
-					if(this.scheme[i].match(RegExp(`(\\||^)\\s*${a}\\s*(\\||$)`,"i")))
-						return this.input[i]=v;
+					if(this.scheme[i].match(RegExp(`(\\||^)\\s*${a}\\s*(\\||$)`,"i"))){
+						this.input[i]=v;
+					}
+				return v;
 			},
 			_getScheme(){
 				return this.scheme=Controller.parseScheme(Controller.getSchemeByName(this.name).data);

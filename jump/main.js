@@ -3,12 +3,14 @@ function dimensionCanvas(){
     camera.setCanvasDimensions(window.innerWidth,window.innerHeight);
 }
 window.onresize=dimensionCanvas;
+localStorage.setItem("willKeep",+localStorage.getItem("willKeep"));
 var pad=new Controller("a",{
-	"start":"Left Arrow|Pad0Button0",
+	"start":"Left Arrow|Space|Pad0Button0",
 	"jump":"Up Arrow|Space|Pad0Button3",
 	"dash":"Right Arrow|Pad0Button1",
 	"fall":"Down Arrow|Pad0Button2",
-    "refresh":"R"
+    "refresh":"R",
+    "state":"E"
 }),player={
     alive:0,
 	POS:new Point(0,30),
@@ -43,9 +45,6 @@ var pad=new Controller("a",{
         this.poses=[];
         this.vel=new Point(this.VEL,0);
         this.setAction("run");
-        Block.last_X=-10;
-        Block.last_Y=-1;
-        Block.all=[];
     },
     grav(a){
         this.vel.y-=a;
