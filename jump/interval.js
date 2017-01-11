@@ -9,7 +9,7 @@ function step(){
 	} else {
         if(pad.getNewInput("start")){
             player.setup();
-            if(!+localStorage.getItem("willKeep")){
+            if(!(Block.all.length&&+localStorage.getItem("willKeep"))){
                 Block.last_X=-10;
                 Block.last_Y=-1;
                 Block.all=[];

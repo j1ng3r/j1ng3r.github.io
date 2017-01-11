@@ -84,12 +84,12 @@ var pad=new Controller("a",{
     	switch(this.action){
 			case"run":
                 this.vel.x=this.VEL;
-				if(pad.getInput("jump")){
+                if(pad.getNewInput("dash")){
+                    this.setAction("gdash");
+                } else if(pad.getInput("jump")){
                     this.XtraScore+=this.SCORE.JUMP;
                     this.vel.y=this.JUMP;
                     this.setAction("air");
-                } else if(pad.getNewInput("dash")){
-                    this.setAction("gdash");
                 }
 				break;
             case"gdashend":

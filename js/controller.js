@@ -27,7 +27,7 @@ window.Controller=function(){
 						validGamepads.push(a[i]);
 				for(i of _){
 					i=i.trim();
-					b=(i.match(/\d+/g)||[])[1]
+					b=(i.match(/\d+/g)||[])[1];
 					if(i.slice(0,3)=="Pad"){
 						if(a=validGamepads[i[3]])
 							this.input[n]=(i.slice(4,8)!="Axis"

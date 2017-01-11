@@ -12,7 +12,6 @@ Block=Object.assign(Block,{
 		},
 		checkLand(){
 			var d=player.pos.sub(this.pos),ps=player.size/2;
-
 		},
 		step(){
 			var ps=player.size/2,d=player.pos.sub(this.pos);
@@ -35,6 +34,7 @@ Block=Object.assign(Block,{
 		(typeof i=="object"?i:Block.all[i]).kill();
 	},
 	chunkey:{},
+	all:[],
 	stats:{
 		"floor":{
 			offset:new Point(),
