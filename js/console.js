@@ -20,6 +20,7 @@ function parse(a){
 		case"function":
 			return string(a);
 		case"object":
+			if(a)return"<span style='color:#888'>null</span>";
 			if(a.constructor==RegExp)return"<span style='a44'>"+string(a)+"</span>";
 			return string(JSON.stringify(a));
 	}
