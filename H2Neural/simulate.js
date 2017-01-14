@@ -40,7 +40,7 @@ args=[
 
 /*
     For a bubble of hydrogen with volume Vm^3, the gravity pulling it down has a force of
-        F0=-Vm^3*d(H2)g/m^3*G
+        F0=-Vm^3*d(H2)g/m^3*Gm/s^2
     but has a force pushing it up at a force of
         F1=Vm^3*d(H2O)g/m^3*G
     the total force pushing it up is
@@ -81,10 +81,37 @@ args=[
     solving for the indefinite integral, we get
         int=int v(h)dh=int sqrt(2ah)dh=sqrt(2a)*(int sqrt(h)dh=int h^1/2 dh=(h^3/2)/(3/2)=2/3 h^3/2)=sqrt(8a/9)*h^3/2
     completing the integral gives us
-        avg=sqrt(8a/9)*H^(3/2)/H=sqrt(8aH)/3
-    thus, the velocity of the created hydrogen leaving the plates of height H is equivalent to sqrt(8HG*(d(H2O)-d(H2))/d(H2))/3
-    F=G(m1m2)/r^2
-    m^s^2
-    G=k*m/g
-
+        avg=sqrt(8a/9)*H^(3/2)/H=sqrt(8aH)/3=sqrt(8HG*(d(H2O)-d(H2))/d(H2))/3
+    We now find the maximum amount of hydrogen leaving the plates
+        g=avg*plate_dist*plate_length*d(H2)
+         =plate_dist*plate_length*d(H2)*sqrt(8HG*()/d(H2))/3
+         =plate_dist*plate_length*sqrt(8HG*(d(H2O)-d(H2))*d(H2))/3
+        mol=g/mass(H2)=plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
+    thus, the maximum amount of hydrogen able to leave a set of plates is equivalent to
+        plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
+************************************************
+    Presentation:
+        Why/What?
+        Real-time H2 Gen 2 Power Cars
+        Need to optimize and span large trade space
+        Built custom AI to find maximum value
+            JS Expander*
+            Defining Constants*
+            AI Library (Bio-inspired)
+                Picks random points on a multivariable surface
+                These points are assigned "genes" which describe where they are on the surface
+                If a gene does well, it gets cloned, meaning that its gene gets "mutated", or slightly changed, which allows the AI to explore the area around it.
+                If not, it gets deleted.
+                Over time, the AI will reach the optimum conditions, and it then returns these conditions to you
+            Simulation
+                Focuses on a few general areas: Geometry, Material, Power, and Reactant Solution
+            Cost function
+                User defined
+                Tells the AI what is important and what isn't
+            AI code
+                Calls the library
+                Has some user controls
+            * Don't tok aboot thees
+        Get Results from AI and rebuild H2 Generator
+            Need to finish model and put it into code
 */

@@ -20,14 +20,14 @@ function Spike(x,y){
 
 
 (new AI)
-    .defineGeneCount(50)
-    .defineIterations(500)
+    .defineGeneCount(75)
+    .defineIterations(200)
     .defineArguments("x","y")
     .defineCostFunction(Bowl)
     .defineReproduction("linear")
     .defineCompletionFunction("return",console.log)
     .defineGeneProperties({
-        makeNewProb:0.01,
+        makeNewProb:0.015,
         mutProb:0.7,
         resetProb:0.1,
         maxVal:1,
