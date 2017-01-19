@@ -1,5 +1,6 @@
 function step(){
     if(pad.getInput("refresh"))history.go();
+    if(pad.getNewInput("die"))player.alive=0;
     if(player.alive){
         player.step();
 		for(var i of Block.all)

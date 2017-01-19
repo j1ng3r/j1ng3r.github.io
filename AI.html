@@ -7,8 +7,8 @@
         <script>
 
 function LopBowl(x,y){
-    var z=Math.sqrt(x*x+y*y);
-    return(4+Math.tanh(x))*Math.exp(z-z*z)*Math.sqrt(1-z*z)*z*z*Math.sin(x*y);
+    var z=x*x+y*y;
+    return(4+Math.tanh(x))*Math.exp(Math.sqrt(z)-z)*Math.sqrt(1-z)*z*Math.sin(x*y);
 }
 function Bowl(x,y){
     var z=Math.sqrt(x*x+y*y);
@@ -24,7 +24,7 @@ function Spike(x,y){
     .defineIterations(200)
     .defineArguments("x","y")
     .defineCostFunction(Bowl)
-    .defineReproduction("linear")
+    .defineReproduction("linear",5)
     .defineCompletionFunction("return",console.log)
     .defineGeneProperties({
         makeNewProb:0.015,

@@ -90,28 +90,29 @@ args=[
     thus, the maximum amount of hydrogen able to leave a set of plates is equivalent to
         plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
 ************************************************
-    Presentation:
-        Why/What?
-        Real-time H2 Gen 2 Power Cars
-        Need to optimize and span large trade space
-        Built custom AI to find maximum value
-            JS Expander*
-            Defining Constants*
-            AI Library (Bio-inspired)
-                Picks random points on a multivariable surface
-                These points are assigned "genes" which describe where they are on the surface
-                If a gene does well, it gets cloned, meaning that its gene gets "mutated", or slightly changed, which allows the AI to explore the area around it.
+Presentation:
+    Why/What?
+    Real-time H2 Gen 2 Power Cars
+    Need to optimize and span large trade space
+        The optimum results will be different depending on priorities.
+        If you value efficiency, the optimum plate material is probably platinum.
+        If you value your money, steel is probably the way to go.
+    Built custom AI to find maximum value
+        AI Library (Bio-inspired)
+            Picks random points on a multivariable surface
+            These points are assigned "genes" which describe where they are on the surface
+                If a gene does well, it gets cloned, and its gene gets "mutated", or slightly changed.
+                    This allows the AI to explore the area around the gene that did well.
                 If not, it gets deleted.
-                Over time, the AI will reach the optimum conditions, and it then returns these conditions to you
-            Simulation
-                Focuses on a few general areas: Geometry, Material, Power, and Reactant Solution
-            Cost function
-                User defined
-                Tells the AI what is important and what isn't
-            AI code
-                Calls the library
-                Has some user controls
-            * Don't tok aboot thees
-        Get Results from AI and rebuild H2 Generator
-            Need to finish model and put it into code
+            Over time, the AI will reach the optimum conditions, and it then returns these conditions to you
+        Simulation
+            Focuses on a few general areas: Geometry, Material, Power, and Reactant Solution
+        Cost function
+            User defined
+            Tells the AI what is important and what isn't
+        AI code
+            Calls the library
+            Has some user controls
+    Get Results from AI and rebuild H2 Generator
+        *Need to finish model and put it into code
 */

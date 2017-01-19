@@ -10,31 +10,11 @@ var pad=new Controller("a",{
 	"dash":"Right Arrow|Pad0Button1",
 	"fall":"Down Arrow|Pad0Button2",
     "refresh":"R",
-    "state":"E"
+    "state":"E",
+    "die":"Q"
 }),player={
     alive:0,
-	POS:new Point(0,30),
     poses:[],
-    maxPoses:7,
-    posLength:5,
-    VEL:6.3,
-    DASHMULT:1.8,
-    GDASHMULT:1.4,
-    GRAV:0.8,
-    TERMVEL:9,
-    FFTERMVEL:20,
-    FLOATSCALE:0.5,
-    FF:5,
-    JUMP:11,
-    SCORE:{
-        JUMP:1,
-        DASH:-0.5,
-        GDASH:0.15,
-    },
-    frames:{
-        "dash":[14,17],
-        "gdash":[7],
-    },
     canfall:["run","gdash"],
     setup(){
         localStorage.setItem("hiscore",Math.max(+this.score||0,+localStorage.getItem("hiscore")||0));

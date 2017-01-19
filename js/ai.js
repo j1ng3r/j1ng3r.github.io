@@ -53,10 +53,14 @@ window.AI=function(){
     Object.assign(AI,{
         Gene:Gene,
         cloneFuncs:{
-            linear(genes,num){
+            linear(genes,num,mod){
                 var g=[],i=0,j=0;
+                mod=Number.eval(mod[0]);
     			while(g.length<num){
-    				if(j>i){
+                    if(mod>0){
+                        mod--;
+                        g.push(genes[i]);
+                    } else if(j>i){
     					g.push(genes[i]);
     					i++;
     				} else {
@@ -66,7 +70,7 @@ window.AI=function(){
     			}
                 return g;
             },
-            random(genes){
+            random(genes,num,mod){
                 var g=[];
                 while(g.length<num)
                     g.push(genes[Math.floor(Math.rand(num))]);
@@ -111,11 +115,13 @@ window.AI=function(){
             this.iterationCount=Number.requirePositiveInteger(n);
             return this;
         },
-        defineReproduction(func){
+        defineReproduction(func,...mod){
             if(typeof func=="string"&&AI.cloneFuncs.hasOwnProperty(func)){
                 this.cloneFunc=AI.cloneFuncs[func];
+                this.cloneMod=mod;
             } else if(typeof func=="function"){
                 this.cloneFunc=func;
+
             } else {
                 throw new TypeError("Reproduction must be a function or predefined string.");
             }
@@ -188,7 +194,7 @@ window.AI=function(){
             for(this.iterations=0;this.iterations<this.iterationCount;this.iterations++){
                 this.genes=this.cloneFunc(new Proxy(this,{
                     get(o,k,p){return o.genes[k].clone.apply(o.genes[k],[o]);}
-                }),this.geneCount);
+                }),this.geneCount,this.cloneMod);
                 for(var j in this.genes){
                     var args=[],gene=this.genes[j],val;
                     for(var k of this.simulation.args)

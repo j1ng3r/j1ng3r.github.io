@@ -1,0 +1,60 @@
+<!DocType Html>
+<html>
+    <head>
+        <link rel="stylesheet" href="js/fullscreen.css">
+        <script>
+        /*function drawFractal(C,I,P,S){
+            var L="length",X=-1/0,t=C.getContext("2d"),q,Y=P[L],M=Math.pow;
+            for(q of P)X=q[L]>X?q[L]:X;
+            C.width=M(X,I);
+            C.height=M(Y,I);
+            var img=t.getImageData(0,0,C.width,C.height);
+            img.data.fill(255);
+            console.log(QQQ=img.data);
+            p=(d,v)=>{
+                d[v++]=d[v++]=d[v++]=0;
+            };
+            (d=(x,y,n,i,j)=>{for(i in P)for(j in P[i])n&&S.includes(P[i][j])&&d(+j+x*X,+i+y*Y,n-1);n||p(img.data,(y*X+x)*4);})(0,0,I);
+            t.putImageData(img,0,0);
+        }*/
+        function drawFractal(c,I,P,S,A,D){
+            var L="length",X=-1/0,t=C.getContext("2d"),q,Y=P[L],M=Math.pow;
+            for(q of P)X=q[L]>X?q[L]:X;
+            t.fillRect(0,0,C.width=M(X,I),C.height=M(Y,I),t.fillStyle=A);
+            t.fillStyle=D;
+            +function d(x,y,n,i,j){for(i in P)for(j in P[i])n&&P[i][j]==S&&d(+j+x*X,+i+y*Y,n-1);n||t.fillRect(x,y,1,1);}(0,0,I);
+        }
+        </script>
+        <script>
+            size=0;
+            pattern=`
+--------------
+ooooo 
+oooo
+ooo
+oo
+o
+
+--------------
+            `.split(/\n/).slice(2,-2);
+            char="o";
+            iterations=4;
+            /**Code**/
+            if(size){
+                pattern=[];
+                char="#";
+                for(i=0;i<size;i++){
+                    pattern[i]="";
+                    for(j=0;j<size;j++)
+                        pattern[i]+=Math.random()<0.5?"#":" ";
+                }
+                iterations=Math.floor(Math.log(864)/Math.log(size));
+                console.log(iterations);
+            }
+
+            C=document.createElement("canvas");
+            self.onload=_=>document.body.appendChild(C);
+        </script>
+        <script>/*X=-1/0;P=pattern;for(q of P)X=q.length>X?q.length:X;D=document;c=D.createElement("canvas");t=c.getContext("2d");Y=P.length;I=iterations;M=Math.pow;c.height=M(Y,I);c.width=M(X,I);t.fillStyle="#000";+function d(x,y,n,i,j){for(i in P)for(j in P[i])n&&P[i][j]==char&&d(+j+x*X,+i+y*Y,n-1);n||t.fillRect(x,y,1,1);}(0,0,I);self.onload=_=>D.body.appendChild(c);*/</script>
+    <body></body>
+</html>
