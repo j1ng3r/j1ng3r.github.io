@@ -21,7 +21,7 @@ Object.assign(player,{
         "gdash":[7],
     }
 });
-Block.stats={
+BLOCKSTATS={
     "floor":{
         offset:new Point(),
         char:"#",
@@ -80,5 +80,10 @@ Block.stats={
         char:'-',
         canland:true,
         nonfatal:true
+    },
+    "pillar":{
+        offset:new Point(1/4,0),
+        char:"p",
+        canland:true
     }
 };

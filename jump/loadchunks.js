@@ -1,8 +1,7 @@
+Block.stats=BLOCKSTATS;
 Block.size=function(i,j,a){
 	var max=0;
-	console.error(Block.stats);
 	for(i in Block.stats){
-		console.debug(i,Block.stats[i]);
 		Block.chunkey[Block.stats[i].char]=i;
 		a=camera.createSprite(i,`jump/sprites/block_${i}.png`);
 		console.debug(a,"a.width = "+a.width);

@@ -13,6 +13,13 @@ window.camera={
 		x:0,
 		y:0,
 	},
+	paused:false,
+	pause(){
+		this.paused=true;
+	},
+	resume(){
+		this.paused=false;
+	},
 	init(){
 		this.setCanvas(document.createElement("canvas"));
 		function a(){
@@ -32,22 +39,50 @@ window.camera={
 	},
 	fill(a){this.ctx.fillStyle=a;},
 	background(a){
+		this.pause();
 		this.fill(a);
 		this.drawRect(0,0,this.c.width,this.c.height);
+		this.resume();
 	},
 	_(v,n){return v-v*2*this.flipped[n];},
 	translate(x,y){
 		this.ctx.translate(this._(x,'x'),this._(y,"y"));
 	},
 	draw(){
-		this.translate(-this.x,-this.y);
-		this.ctx.rotate(this.r);
+		this.checkPause();
 		this.draw_untranslated.apply(this,arguments);
 		this.reset();
 	},
+	checkPause(){
+		if(!this.paused){
+			this.translate(-this.x,-this.y);
+			this.ctx.rotate(this.r);
+		}
+	},
+	createSpritesFromFolder(dir,arr,ex,func){
+		func=typeof func=="function"?func:(_=>_);
+		for(var i of arr)
+			camera.createSprite(func(i),""+dir+i+ex);
+	},
 	drawRect(x,y,w,h){
+		this.checkPause();
 		this.translate(x,y);
 		this.ctx.fillRect(0,0,this._(w,'x'),this._(h,'y'));
+		this.reset();
+	},
+	font(f){
+		this.ctx.font=f;
+	},
+	textAlign(a){
+		this.ctx.textAlign=a;
+	},
+	drawText(t,x,y){
+		this.checkPause();
+		this.translate(x,y);
+		var txt=typeof t=="string"?t.split("\n"):t,h=this.ctx.font.match(/\d+/)[0];
+		for(var i in txt){
+			this.ctx.fillText(txt[i],0,i*h*1.2);
+		}
 		this.reset();
 	},
 	draw_untranslated(name,x,y,r){

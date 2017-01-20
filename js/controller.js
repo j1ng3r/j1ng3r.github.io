@@ -19,6 +19,7 @@ window.Controller=function(){
 				return this.getInput(n)&&!this.oldInput[n];
 			},
 			getInput(n){
+				if(!this.scheme.hasOwnProperty(n))throw`No property ${n} exists on this controller.`;
 				var _ = this.scheme[n].split("|"),
 				a=Controller.window.navigator.getGamepads(),
 				b,validGamepads=[],i;
@@ -71,16 +72,27 @@ window.Controller=function(){
 					this.input[i]=!0;
 			},
 			defaultPrevented:false,
-			preventDefault(){
+			defaultWhiteList:[],
+			defaultBlackList:[],
+			preventDefault(m,w){
+				this.allowDefault();
+				this["default"+m]=w;
 				this.defaultPrevented=true;
 			},
 			allowDefault(){
+				this.defaultWhiteList=[];
+				this.defaultBlackList=[];
 				this.defaultPrevented=false;
 			},
 			_event(e){
-				if(this.defaultPrevented)e.preventDefault();
+				var n=Controller.parseEvent(e);
+				if(this.defaultPrevented&&(
+					(this.defaultWhiteList.length&&!this.defaultWhiteList.includes(n))||
+					(this.defaultBlackList.length&&this.defaultBlackList.includes(n)))){
+						e.preventDefault();
+				}
 				if(e.type.slice(0,3)=="key")
-					this._activate(Controller.parseEvent(e),e.type=="keydown"?1:0);
+					this._activate(n,e.type=="keydown"?1:0);
 			},
 			addControl(c){
 				Controller.buttonNames.push(""+c);

@@ -3,7 +3,7 @@ function Block(t,x,y){
 	this.pos=new Point(x,y).add(Block.stats[this.type].offset.scale(Block.size));
 	this.index=Block.all.push(this)-1;
 	this.size=new Point(Block.sizes[this.type]);
-	this.func=(Block.stats[this.type].func||function(){}).bind(this);
+	this.func=(Block.stats[this.type].func||(_=>8)).bind(this);
 }
 Object.assign(Block.prototype,{
 	kill(){
