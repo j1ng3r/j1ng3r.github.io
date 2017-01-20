@@ -1,16 +1,8 @@
-Block.stats=BLOCKSTATS;
-Block.size=function(i,j,a){
-	var max=0;
-	for(i in Block.stats){
-		Block.chunkey[Block.stats[i].char]=i;
-		a=camera.createSprite(i,`jump/sprites/block_${i}.png`);
-		console.debug(a,"a.width = "+a.width);
-		max=Math.max(max,a.width,a.height);
-		Block.sizes[i]=new Point(a).div(2);
-	}
-	return max;
-}();
-var chunks=null;
+for(var i in Block.stats){
+	Block.chunkey[Block.stats[i].char]=i;
+	camera.createSprite(i,`jump/sprites/block_${i}.png`);
+}
+chunks=null;
 function chunkify(){
     for(var i of Block.all){
         if(i.x-camera.x<-Block.size)

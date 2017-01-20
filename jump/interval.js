@@ -40,11 +40,14 @@ function step(){
 }
 function draw(){
     var a=(camera.RGB[0]*256+camera.RGB[1])*256+camera.RGB[2];
-	camera.ctx.fillStyle="#"+"0".repeat(6-a.toString(16).length)+a.toString(16);
-	camera.drawRect(0,0,camera.c.width,camera.c.height);
+    camera.background("#"+"0".repeat(6-a.toString(16).length)+a.toString(16));
 	for(var i of Block.all)
 		i.draw();
 	player.draw();
-    if(!player.alive)
-        camera.draw_untranslated("Start",camera.c.width/2,camera.c.height/2);
+    if(!player.alive){
+        camera.pause();
+        camera.draw("Start",camera.c.width/2,camera.c.height/2) ;
+        camera.resume();
+    }
+        camera.draw_untranslated();
 }

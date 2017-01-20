@@ -35,5 +35,5 @@ Object.assign(Block,{
 	},
 	chunkey:{},
 	all:[],
-	sizes:{}
+	sizes:{},
 });
