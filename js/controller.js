@@ -64,7 +64,7 @@ window.Controller=function(){
 			changeControl(name,key){
 				if(key)for(var i in this.scheme)
 					if(this.scheme[i]==key)
-						this.scheme[i]==this.scheme[name];
+						this.scheme[i]=this.scheme[name];
 				this.scheme[name]=key;
 			},
 			resetAllInputs(i){
@@ -88,7 +88,8 @@ window.Controller=function(){
 				var n=Controller.parseEvent(e);
 				if(this.defaultPrevented&&(
 					(this.defaultWhiteList.length&&!this.defaultWhiteList.includes(n))||
-					(this.defaultBlackList.length&&this.defaultBlackList.includes(n)))){
+					(this.defaultBlackList.length&&this.defaultBlackList.includes(n)))||
+					!(this.defaultBlackList.length||this.defaultWhiteList.length)){
 						e.preventDefault();
 				}
 				if(e.type.slice(0,3)=="key")

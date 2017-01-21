@@ -1,7 +1,3 @@
-for(var i in Block.stats){
-	Block.chunkey[Block.stats[i].char]=i;
-	camera.createSprite(i,`jump/sprites/block_${i}.png`);
-}
 chunks=null;
 function chunkify(){
     for(var i of Block.all){

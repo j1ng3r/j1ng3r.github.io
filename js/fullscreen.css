@@ -1,7 +1,7 @@
 /*
 <link rel="stylesheet" href="js/fullscreen.css">
 */
-html,body,canvas{
+html,body,canvas,div {
     padding:0px;
     margin:0px;
     border:0px;

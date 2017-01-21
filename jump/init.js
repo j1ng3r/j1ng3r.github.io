@@ -14,6 +14,7 @@ function init(){if(!--loaders){
 	player.alive=0;
 	document.body.appendChild(camera.c);
 	interval(step,draw,60);
+	document.body.removeChild(document.querySelector("#loading"));
 }}
 window.onload=init;
 readJSONFile("jump/chunks.json",function(a){
