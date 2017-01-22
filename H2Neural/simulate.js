@@ -1,6 +1,10 @@
 function Simulate(I){
+    //Initializing the
     var O={},T={};
-    T.true_cell_voltage=K.ideal_cell_voltage-math.constant("")
+    /*
+    Here we
+    */
+    T.cell_voltage=K.ideal_cell_voltage;
     T.overpotential=K.getOverPotential(I.voltage);
     T.kg_of_water=I.liters_of_water*K.getWaterDensity(I.temperature);
     T.plate_volume=I.plate_width*I.plate_length*I.plate_height;
