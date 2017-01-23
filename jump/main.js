@@ -23,7 +23,7 @@ var pad=new Controller("a",{
         this.score=0;
         this.pos=new Point(this.POS);
         this.poses=[];
-        this.vel=new Point(this.VEL,0);
+        this.vel=new Point(Number.eval(this.VEL,this.pos.x),0);
         this.setAction("run");
     },
     grav(a){
@@ -61,9 +61,10 @@ var pad=new Controller("a",{
     },
     step(){
         this.frame++;
+        var VEL=Number.eval(this.VEL,this.pos.x);
     	switch(this.action){
 			case"run":
-                this.vel.x=this.VEL;
+                this.vel.x=VEL;
                 if(pad.getNewInput("dash")){
                     this.setAction("gdash");
                 } else if(pad.getInput("jump")){
@@ -73,17 +74,17 @@ var pad=new Controller("a",{
                 }
 				break;
             case"gdashend":
-                if(this.frame<this.frames.gdash[0])this.vel.x=this.VEL*Math.pow(this.GDASHMULT,1-this.frame/this.frames.gdash[0]);
+                if(this.frame<this.frames.gdash[0])this.vel.x=VEL*Math.pow(this.GDASHMULT,1-this.frame/this.frames.gdash[0]);
                 else this.setAction("run");
                 break;
             case"gdash":
                 if(pad.getInput("dash")){
                     this.XtraScore+=this.SCORE.GDASH;
-                    this.vel.x=this.VEL*this.GDASHMULT;
+                    this.vel.x=VEL*this.GDASHMULT;
                 } else this.setAction("gdashend");
                 break;
             case"air":
-                this.vel.x=this.VEL;
+                this.vel.x=VEL;
                 if(pad.getNewInput("fall"))this.setAction("fall");
                 else if(pad.getNewInput("dash"))this.setAction("dash");
                 else if(pad.getInput("jump"))this.grav(this.GRAV*this.FLOATSCALE);
@@ -97,9 +98,9 @@ var pad=new Controller("a",{
             case"dash":
                 if(this.frame<this.frames.dash[0]){
                     this.XtraScore+=this.SCORE.DASH;
-                    this.vel.x=this.VEL*this.DASHMULT;
+                    this.vel.x=VEL*this.DASHMULT;
                 } else if(this.frame<this.frames.dash[1]){
-                    this.vel.x=this.VEL*Math.pow(this.DASHMULT,(this.frames.dash[1]-this.frame)/(this.frames.dash[1]-this.frames.dash[0]));
+                    this.vel.x=VEL*Math.pow(this.DASHMULT,(this.frames.dash[1]-this.frame)/(this.frames.dash[1]-this.frames.dash[0]));
                     this.grav(this.GRAV);
                 } else this.setAction("air");
                 break;
