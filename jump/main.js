@@ -117,16 +117,8 @@ var pad=new Controller("a",{
         this.vel=this.mov.scale(this.curvel);
     }
 };
-+function setSize(s){
-    player.size=s;
-    pad.preventDefault("WhiteList",["LControl","F11"]);
-    dimensionCanvas();
-    camera.flipAxis("y");
-    camera.RGB=[255,255,255];
-    camera.RGB[Math.floor(Math.rand(0,3))]=0;
-    camera.createSprite("dead",`jump/sprites/dead${s}.png`);
-    camera.createSprite("Start","jump/sprites/start.png");
-    camera.createSprite("player",`jump/sprites/player${s}.png`);
-    for(var i of "1234567890-hi")
-        camera.createSprite(i,`jump/sprites/number_${i}.png`);
-}(40);
+pad.preventDefault("BlackList",["F11"]);
+dimensionCanvas();
+camera.flipAxis("y");
+camera.RGB=[255,255,255];
+camera.RGB[Math.floor(Math.rand(0,3))]=0;

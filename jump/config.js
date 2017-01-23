@@ -2,7 +2,7 @@ Object.assign(player,{
     POS:new Point(0,30),
     maxPoses:7,
     posLength:5,
-    VEL:x=>1.6*Math.pow(Math.log(x+4),0.58),
+    VEL:x=>Math.pow(x+2000,0.1)+3,
     DASHMULT:1.8,
     GDASHMULT:1.4,
     GRAV:0.8/6.3/6.3,
