@@ -16,6 +16,7 @@ var pad=new Controller("a",{
     alive:0,
     poses:[],
     canfall:["run","gdash"],
+    curvel:0,
     setup(){
         localStorage.setItem("hiscore",Math.max(+this.score||0,+localStorage.getItem("hiscore")||0));
         this.alive=1;
@@ -23,21 +24,21 @@ var pad=new Controller("a",{
         this.score=0;
         this.pos=new Point(this.POS);
         this.poses=[];
-        this.vel=new Point(Number.eval(this.VEL,this.pos.x),0);
+        this.mov=new Point(1,0);
         this.setAction("run");
     },
     grav(a){
-        this.vel.y-=a;
+        this.mov.y-=a*this.curvel;
         if(this.action=="fall"){
-            if(this.vel.y<-this.FFTERMVEL)this.vel.y=-this.FFTERMVEL;
-        } else if(this.vel.y<-this.TERMVEL)this.vel.y=-this.TERMVEL;
+            if(this.mov.y<-this.FFTERMVEL)this.mov.y=-this.FFTERMVEL;
+        } else if(this.mov.y<-this.TERMVEL)this.mov.y=-this.TERMVEL;
     },
     land(){
         if(!this.canfall.includes(this.action))this.setAction("run");
     },
     kill(){
         this.alive=false;
-        this.vel=new Point();
+        this.mov=new Point();
     },
     setAction(a){
         this.action=""+a;
@@ -61,57 +62,64 @@ var pad=new Controller("a",{
     },
     step(){
         this.frame++;
-        var VEL=Number.eval(this.VEL,this.pos.x);
+        this.curvel=Number.eval(this.VEL,this.pos.x);
+        var FRAMES={},i,j;
+        for(i in this.frames){
+            FRAMES[i]=[];
+            for(j in this.frames[i])
+                FRAMES[i][j]=Math.floor(this.frames[i][j]/this.curvel);
+        }
     	switch(this.action){
 			case"run":
-                this.vel.x=VEL;
+                this.mov.x=1;
                 if(pad.getNewInput("dash")){
                     this.setAction("gdash");
                 } else if(pad.getInput("jump")){
                     this.XtraScore+=this.SCORE.JUMP;
-                    this.vel.y=this.JUMP;
+                    this.mov.y=this.JUMP;
                     this.setAction("air");
                 }
 				break;
             case"gdashend":
-                if(this.frame<this.frames.gdash[0])this.vel.x=VEL*Math.pow(this.GDASHMULT,1-this.frame/this.frames.gdash[0]);
+                if(this.frame<FRAMES.gdash[0])this.mov.x=Math.pow(this.GDASHMULT,1-this.frame/FRAMES.gdash[0]);
                 else this.setAction("run");
                 break;
             case"gdash":
                 if(pad.getInput("dash")){
-                    this.XtraScore+=this.SCORE.GDASH;
-                    this.vel.x=VEL*this.GDASHMULT;
+                    this.XtraScore+=this.SCORE.GDASH*this.curvel;
+                    this.mov.x=this.GDASHMULT;
                 } else this.setAction("gdashend");
                 break;
             case"air":
-                this.vel.x=VEL;
+                this.mov.x=1;
                 if(pad.getNewInput("fall"))this.setAction("fall");
                 else if(pad.getNewInput("dash"))this.setAction("dash");
                 else if(pad.getInput("jump"))this.grav(this.GRAV*this.FLOATSCALE);
                 else this.grav(this.GRAV);
                 break;
             case"fall":
-                if(pad.getInput("fall"))this.vel.y-=this.FF;
+                if(pad.getInput("fall"))this.mov.y-=this.FF;
                 if(pad.getNewInput("dash"))this.setAction("dash");
                 else this.grav(this.GRAV);
                 break;
             case"dash":
-                if(this.frame<this.frames.dash[0]){
-                    this.XtraScore+=this.SCORE.DASH;
-                    this.vel.x=VEL*this.DASHMULT;
-                } else if(this.frame<this.frames.dash[1]){
-                    this.vel.x=VEL*Math.pow(this.DASHMULT,(this.frames.dash[1]-this.frame)/(this.frames.dash[1]-this.frames.dash[0]));
+                if(this.frame<FRAMES.dash[0]){
+                    this.XtraScore+=this.SCORE.DASH*this.curvel;
+                    this.mov.x=this.DASHMULT;
+                } else if(this.frame<FRAMES.dash[1]){
+                    this.mov.x=Math.pow(this.DASHMULT,(FRAMES.dash[1]-this.frame)/(FRAMES.dash[1]-FRAMES.dash[0]));
                     this.grav(this.GRAV);
                 } else this.setAction("air");
                 break;
 		}
         if(this.canfall.includes(this.action))this.grav(this.GRAV);
         this.score=Math.floor(this.pos.x/50+this.XtraScore);
+        this.vel=this.mov.scale(this.curvel);
     }
 };
 +function setSize(s){
     player.size=s;
-    pad.preventDefault();
+    pad.preventDefault("WhiteList",["LControl","F11"]);
     dimensionCanvas();
     camera.flipAxis("y");
     camera.RGB=[255,255,255];

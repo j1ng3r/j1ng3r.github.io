@@ -2,23 +2,23 @@ Object.assign(player,{
     POS:new Point(0,30),
     maxPoses:7,
     posLength:5,
-    VEL:6.3,
+    VEL:x=>1.6*Math.pow(Math.log(x+4),0.58),
     DASHMULT:1.8,
     GDASHMULT:1.4,
-    GRAV:0.8,
-    TERMVEL:9,
-    FFTERMVEL:20,
+    GRAV:0.8/6.3/6.3,
+    TERMVEL:9/6.3,
+    FFTERMVEL:20/6.3,
     FLOATSCALE:0.5,
-    FF:5,
-    JUMP:11,
+    FF:0.7,
+    JUMP:11/6.3,
     SCORE:{
         JUMP:1,
-        DASH:-0.5,
-        GDASH:0.15,
+        DASH:-0.5/6.3,
+        GDASH:0.15/6.3,
     },
     frames:{
-        "dash":[14,17],
-        "gdash":[7],
+        "dash":[14*6.3,17*6.3],
+        "gdash":[7*6.3],
     }
 });
 Block.stats={
