@@ -1,4 +1,5 @@
 chunks=null;
+var layout=[];
 function chunkify(){
     for(var i of Block.all){
         if(i.x-camera.x<-Block.size)
@@ -10,6 +11,7 @@ function chunkify(){
 }
 function addChunk(a){
     console.info("Adding Chunk");
+    layout.push(a);
 	var next_chunk=Object.deepCopy(chunks[a]).reverse(),merge_layer=-1,i,j,last_layer;
 	for(i in next_chunk){
 		if(next_chunk[i][0]=="#")merge_layer=i;

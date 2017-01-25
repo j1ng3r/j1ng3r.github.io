@@ -2,23 +2,23 @@ Object.assign(player,{
     POS:new Point(0,30),
     maxPoses:7,
     posLength:5,
-    VEL:x=>1.2*Math.pow(x+2000,0.1)+3,
+    VEL:x=>1.1*Math.pow(x+2000,0.11)+3,
     DASHMULT:1.8,
     GDASHMULT:1.4,
     GRAV:0.8/6.3/6.3,
     TERMVEL:9/6.3,
-    FFTERMVEL:20/6.3,
+    FFTERMVEL:3.1,
     FLOATSCALE:0.5,
     FF:0.7,
     JUMP:11/6.3,
     SCORE:{
         JUMP:1,
-        DASH:-0.5/6.3,
-        GDASH:0.15/6.3,
+        DASH:-0.1,
+        GDASH:0.03,
     },
     frames:{
-        "dash":[14*6.3,17*6.3],
-        "gdash":[50],
+        "dash":[90,105],
+        "gdash":[60],
     }
 });
 Block.stats={
@@ -45,7 +45,7 @@ Block.stats={
         canland:true,
         func(d,ps){
             if(ps+this.size.y<=-d.y&&d.y+ps+player.vel.y>=-this.size.y){
-                player.vel.y=0;
+                player.mov.y=player.vel.y=0;
                 player.pos.y=this.pos.y-this.size.y-ps;
             }
         }
@@ -56,7 +56,7 @@ Block.stats={
         canland:true,
         func(d,ps){
             if(ps+this.size.y<=-d.y&&d.y+ps+player.vel.y>=-this.size.y){
-                player.vel.y=0;
+                player.mov.y=player.vel.y=0;
                 player.pos.y=this.pos.y-this.size.y-ps;
             }
         }
@@ -83,7 +83,12 @@ Block.stats={
     },
     "pillar":{
         offset:new Point(1/4,0),
-        char:"p",
+        char:"|",
+        canland:true
+    },
+    "backwall":{
+        offset:new Point(-1/4,0),
+        char:">",
         canland:true
     }
 };

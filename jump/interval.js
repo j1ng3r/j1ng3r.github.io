@@ -11,6 +11,7 @@ function step(){
         if(pad.getNewInput("start")){
             player.setup();
             if(!(Block.all.length&&+localStorage.getItem("willKeep"))){
+                layout=[];
                 Block.last_X=-10;
                 Block.last_Y=-1;
                 Block.all=[];
