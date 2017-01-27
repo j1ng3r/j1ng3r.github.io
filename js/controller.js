@@ -11,9 +11,13 @@ window.Controller=function(){
 	Controller=Object.assign(Controller,{
 		prototype:Object.assign(Controller.prototype,{
 			input:{},
+			events:{},
 			oldInput:{},
 			endStep(){
 				this.oldInput=Object.assign([],this.input);
+			},
+			addEventListener(name,cb){
+				this.events[name]=cb;
 			},
 			getNewInput(n){
 				return this.getInput(n)&&!this.oldInput[n];
@@ -49,6 +53,7 @@ window.Controller=function(){
 				for(var i in this.scheme)
 					if(this.scheme[i].match(RegExp(`(\\||^)\\s*${a}\\s*(\\||$)`,"i"))){
 						this.input[i]=v;
+						(this.events[i]||(_=>0))(v);
 					}
 				return v;
 			},
