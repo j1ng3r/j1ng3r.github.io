@@ -1,47 +1,104 @@
-//TO-DO use math library, use units, and implement
-function Simulate(I){
-    //Initializing the temporary varibles object, and the the output variables object
-    var O={},T={};
+//DONE TO-DO use math library, use units, and implement
+function Simulate(O){
+    //Converting inputs into units
+    O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
+    O.getGasDensity=_=>math.divide(K.mass("2H2O"),math.multiply(3,O["L/mol"](_)));
+    O.xtra_water_weight=math.subtract(O.water_weight,math.multiply(O.plate_dist,O.plate_length,O.plate_height,K.d.H2O));
+    if(O.xtra_water_weight.toNumber()<0)O.xtra_water_weight=math.unit("0 g");
+    //Getting the material properties
+    O.mat=K.MAT[O.plate_material];
+
+    //Defining plate properties through simple multiplications
+    O.plate_area=math.multiply(O.plate_length,O.plate_height);
+    O.plate_volume=math.multiply(O.plate_width,O.plate_area);
+    O.plate_weight=math.multiply(O.mat.density,O.plate_volume,O.number_of_plates);
 
     //Here we define the cell voltage of our system. It may be different based on the Nernst equation, but I don't understand that yet
-    T.cell_voltage=K.ideal_cell_voltage;
+    O.cell_voltage=K.ideal_cell_voltage;
 
-    //Based on that cell voltage, we now calculate the overpotential used in future calculations
-    T.overpotential=I.voltage-T.cell_voltage;
-
-    //Defining the plate volume and area through simple multiplications
-    T.plate_volume=I.plate_width*I.plate_length*I.plate_height;
-    T.plate_area=I.plate_length*I.plate_height;
+    /*/Based on that cell voltage, we now calculate the overpotential used in future calculations
+    O.overpotential=math.subtract(O.voltage,O.cell_voltage);
 
     //Curve with max at 1.48, zero at 1.23, always less than but approaching 1.23/x
-    T.amp_multiplier=K.reaction.ideal_cell_voltage*T.overpotential/
-        (O.voltage*T.overpotential+Math.sq(K.getOverPotential(K.reaction.cell_voltage)));
+    O.amp_multiplier=K.reaction.ideal_cell_voltage*O.overpotential/
+        (O.voltage*O.overpotential+Math.sq(K.getOverPotential(K.reaction.cell_voltage)));//*/
 
     //The energy required to heat or cool the system
-    T.temp_energy=Math.abs(I.temperature-K.room_temperature)*K["J/Cal"];
+    O.temp_energy=math.multiply(math.abs(math.subtract(O.temperature,K.room_temperature)),K["J/Cal"],O.water_weight);
 
-    //
-    T.theo_production=T.theo_amps*I.plate_length*I.plate_height*K.rate*T.amp_multiplier;
+    /*/The maximum outflow of hydrogen in grams per second (proof below)
+    O.maxFlow=math.multiply(O.plate_dist,O.plate_length,math.sqrt(
+        math.multiply(8,O.plate_height,K.G,math.subtract(K.d.H2O),K.d.gas),K.d.gas)
+    ),1/3);//*/
 
-    //The maximum outflow of hydrogen in grams per second
-    T.maxFlow=I.plate_dist*I.plate_length*Math.sqrt(8*I.plate_height*K.G*(K.d("H2O")-K.d.gas)*K.d.gas)/3;
-    T.plate_R=K.rho[I.plate_material]*
-    T.resistance=T.plate_R+T.cathodeR+T.waterR+T.anodeR+T.plate_R;
+    O.cathodeR=math.divide(O.mat.cathode,O.plate_area);
+    O.anodeR=math.divide(O.mat.anode,O.plate_area);
+    //resistance of a single plate, assuming 2 plates
+    O.plate_R=math.divide(
+        math.multiply(O.mat.rho,O.plate_length),
+        math.multiply(O.plate_height,O.plate_width)
+    );
+
+    O.percentMass=math.divide(O.electrolyte_weight,math.add(O.electrolyte_weight,O.water_weight));
+
+    //approx based on data
+    O.datafit=math.eval("f(x)=(30275+35858000x)/(x+25679)*e^(-16.247x)");
+    O.conductivity=math.unit(O.temperature.toNumber()*O.datafit(O.percentMass),"mS/cm");
+    if(O.conductivity<0)O.conductivity=0;
+    O.waterR=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));
+
+    //Solving for the resistance of a single system, assuming 2 plates
+    //console.log(O.plate_R,O.cathodeR,O.waterR,O.anodeR,O.plate_R);
+    O.systemR=math.add(O.plate_R,O.cathodeR,O.waterR,O.anodeR,O.plate_R);
+
+    //TODO, assuming 2 plates
+    O.resistance=O.systemR;
 
     /*/Outdated, need to build better equation
     O.production=function(h,g,x){//mols/s
         h=Math.sqrt(1-Math.sq(h/g));
         return(x+g-Math.sqrt(x*x-2*g*h*x+g*g))/(1+h);
-    }(K.flow_constant,T.maxFlow,T.theo_production);//*/
+    }(K.flow_constant,O.maxFlow,O.theo_production);//*/
 
-    T.amps=I.voltage/T.resistance;
-    T.out_watts=T.amps*I.voltage;
-    T.watts=T.amps*I.voltage;
-    O["mol/s"]=T.amps*3/4/K.F;
-    O["g/s"]=O["mol/s"]*K.mass("2H2O");
-    O.efficiency=T.out_watts/T.watts;
-    O.weight=T.kg_of_water+I.number_of_plates*K[I.plate_material].density*T.plate_volume+K.mass(I.electrolyte_name)*I.electrolyte_weight;
-    return O;
+    //I=V/R
+    O.amps=math.divide(O.voltage,O.resistance);
+    //the production in mols of gas per second
+    O.rate=math.divide(math.multiply(O.amps,3/4),math.faraday);
+
+    //the production in grams per second
+    O["g/s"]=math.multiply(O.rate,K.mass("2H2O"),1/3);
+
+    //the production of hydrogen at STP
+    O["L/s"]=math.multiply(O.rate,O["L/mol"](K.room_temperature));
+
+    //The total time that the system can run for
+    O.production_time=math.divide(O.xtra_water_weight,O["g/s"]);
+
+    O.temp_watts=math.divide(O.temp_energy,O.production_time);
+    /*If the voltage is the cell voltage, the efficiency is 1.
+    Thus, the output watts is the amps times the cell voltage.*/
+    O.out_watts=math.multiply(O.amps,O.cell_voltage);
+
+    //W=VI
+    O.watts=math.add(math.multiply(O.voltage,O.amps),O.temp_watts);
+
+    //Energy out/energy in. Unitless
+    O.efficiency=math.divide(O.out_watts,O.watts);
+
+    //The total weight of the system
+    O.weight=math.add(O.water_weight,O.electrolyte_weight,O.plate_weight);
+    var S={};
+    for(var i in O){
+        S[i]=typeof O[i]=="function"?O[i]:O[i].toString();
+    }
+    var ret={
+        data:S,
+        rate:O.rate.toNumber("mol/s"),
+        time:O.production_time.toNumber("s"),
+        eff:O.efficiency,
+        weight:O.weight.toNumber("g")
+    };
+    return ret;
 }
 args=[
     "voltage",
@@ -56,6 +113,7 @@ args=[
     "electrolyte_name",
     "electrolyte_weight",
     "temperature",
+    "water_weight"
 ];
 
 

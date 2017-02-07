@@ -18,23 +18,37 @@ function Spike(x,y){
     return x/(x*x+y*y);
 }
 
-
-(new AI)
-    .defineGeneCount(75)
+var a=[[1,2],[3,4]];
+new AI()
+	.defineGeneCount(50)
     .defineIterations(200)
-    .defineArguments("x","y")
-    .defineCostFunction(Bowl)
-    .defineReproduction("linear",5)
-    .defineCompletionFunction("return",console.log)
-    .defineGeneProperties({
-        makeNewProb:0.015,
-        mutProb:0.7,
-        resetProb:0.1,
-        maxVal:1,
-        minVal:-1,
-        maxMut:function(ai){return 1/Math.sq(ai.iterations+0.1);},
-        returnFunc:_=>_
-    })
+    .defineArguments("x","y","z")
+    .defineReproduction("linear",10)
+    .defineCostFunction(function(x,y,z){
+		return x+y+z;
+	})
+	.defineCompletionFunction("return",console.log)
+	.defineGeneProperties({
+		mutProb:0.5,
+		resetProb:0.1,
+		makeNewProb:0,
+	},{
+		"x":{
+			array:function(){var a=[];for(var i=0;i<10;i++)a.push(Math.random()*10);console.log(a);return a;}()
+        },
+		"y":{
+			returnFunc:_=>_*_,
+			maxValSoft:5,
+            minValSoft:-3,
+            maxMut:0.5,
+        },
+        "z":{
+            returnFunc:_=>_*_,
+			maxValSoft:5,
+            minValSoft:-3,
+            maxMut:0.5,
+        }
+	})
     .execute()
 ;
 

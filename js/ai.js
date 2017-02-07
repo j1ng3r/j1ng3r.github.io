@@ -48,14 +48,17 @@ window.AI=function(){
                 ));
             }
             return _;
-    	}
+    	},
+        getValue(i){
+            return this.properties[i].returnFunc(this.data[i]);
+        }
     });
     Object.assign(AI,{
         Gene:Gene,
         cloneFuncs:{
             linear(genes,num,mod){
                 var g=[],i=0,j=0;
-                mod=Number.eval(mod[0]);
+                mod=Number.eval(mod,0);
     			while(g.length<num){
                     if(mod>0){
                         mod--;
@@ -90,6 +93,15 @@ window.AI=function(){
         }
     });
     Object.assign(AI.prototype,{
+        DEBUG:false,
+        debug(){
+            this.DEBUG=true;
+            return this;
+        },
+        log(a){
+            if(this.DEBUG)console.log(a);
+            return a;
+        },
         addGeneName(n){
             if(!this.geneNames.includes(n))this.geneNames.push(n);
             return this;
@@ -121,7 +133,6 @@ window.AI=function(){
                 this.cloneMod=mod;
             } else if(typeof func=="function"){
                 this.cloneFunc=func;
-
             } else {
                 throw new TypeError("Reproduction must be a function or predefined string.");
             }
@@ -129,7 +140,7 @@ window.AI=function(){
         },
         defineCostFunction(sim,args){
             this.simulation.func=sim;
-            Object.defaultSetThat(this.simulation,{args:args});
+            this.simulation.args=args||this.simulation.args;
             return this;
         },
         defineCompletionFunction(func,sub){
@@ -145,7 +156,7 @@ window.AI=function(){
             return this;
         },
         defineGeneProperties(all,specific){
-            Object.defaultSetThat(this.geneProperties,{all:all});
+            this.geneProperties.all=all||this.geneProperties.all;
             this.geneProperties.specific=Object.assign({},this.geneProperties.specific,specific);
             if(typeof specific=="object"&&specific){
                 this.defineGeneNames(Object.keys(specific));
@@ -173,13 +184,16 @@ window.AI=function(){
                             minValSoft:0,
                             maxValSoft:array.length,
                             maxMut:array.length,
-                            returnFunc:v=>array[Math.floor(v%array.length)]
+                            returnFunc:v=>array[Math.floor(Math.mod(v,array.length))]
                         });
                     }(this.geneProp[i]);
                 }
                 g=this.geneProp[i];
                 if(s('max')||s('min'))throw new RangeError("Please define the value range before executing.");
-                Object.defaultSetThis(this.geneProp[i],{
+                +function(m,a,x){
+                    for(x in a)
+                        if(!m.hasOwnProperty(x))m[x]=a[x];
+                }(this.geneProp[i],{
                     minValSoft:this.geneProp[i].minVal,
                     maxValSoft:this.geneProp[i].maxVal,
                     minVal:-Infinity,
@@ -190,22 +204,59 @@ window.AI=function(){
             return this;
         },
         execute(){
+            var i,j,k,args,gene,val,g=[];
             this._defineGeneProperties()._createNewGenes();
             for(this.iterations=0;this.iterations<this.iterationCount;this.iterations++){
                 this.genes=this.cloneFunc(new Proxy(this,{
                     get(o,k,p){return o.genes[k].clone.apply(o.genes[k],[o]);}
                 }),this.geneCount,this.cloneMod);
-                for(var j in this.genes){
-                    var args=[],gene=this.genes[j],val;
-                    for(var k of this.simulation.args)
-                        args.push(Number.eval(gene.properties[k].returnFunc,gene.data[k]));
+                for(j in this.genes){
+                    args=[];
+                    gene=this.genes[j];
+                    this.log(gene);
+                    for(k of this.simulation.args)
+                        args.push(gene.getValue(k));
+                    this.log(args);
                     val=this.simulation.func.apply({},args);
-                    gene.cost=isNaN(val)?Infinity:val;
+                    if(isNaN(val)){console.error(`Input function ${this.simulation.func.name} returned NaN with the given arguments:`,args);throw new Error();}
+                    gene.cost=val;
                 }
                 this.genes.sort(function(a,b){return a.cost-b.cost;});
             }
-            return this.simulation.return(this.genes);
+            this.log(this.genes);
+            for(i in this.genes){
+                gene=this.genes[i];
+                g[i]={
+                    cost:gene.cost,
+                    data:{}
+                };
+                for(j in gene.data){
+                    g[i].data[j]=gene.getValue(j);
+                }
+            }
+            return this.simulation.return(g);
         }
     });
     return AI;
 }();
+/*
+(new AI)
+    .defineGeneCount(50)
+    .defineIterations(100)
+    .defineArguments("x","y")
+    .defineCostFunction(LopBowl)
+    .defineReproduction("linear",5)
+    .defineCompletionFunction("return",console.log)
+    .defineGeneProperties(
+        makeNewProb
+        mutProb
+        resetProb
+        maxVal
+        minVal
+        maxMut
+        returnFunc
+        array (optional)
+    )
+    .execute()
+;
+*/

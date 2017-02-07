@@ -55,12 +55,13 @@ Object.assign(Number,{
         } else throw new TypeError("Input must be a positive integer.");
     },
     eval(n,a){
-        return"number"==typeof n?n:Number.eval(typeof n=="function"?n(a):n.hasOwnProperty(a)?n[a]:+n||0,a);
+        return"number"==typeof n?n:Number.eval(typeof n=="function"?n(a):n&&n.hasOwnProperty(a)?n[a]:+n||0,a);
     }
 });
 Object.assign(Math,{
     rand(a,b){return arguments.length?+a+(+b-a)*Math.random():Math.random();},
     sq(a){return a*a;},
+    mod(a,b){return a-b*Math.floor(a/b);},
     factor(n){
         if(n=Math.floor(n)){
             var a=[],i;
@@ -69,7 +70,7 @@ Object.assign(Math,{
                 n*=-1;
             }
             for(i=2;i<=Math.sqrt(n);i++)
-                if(!(n%i)){
+                if(!Math.mod(n,i)){
                     n/=i;
                     a.push(i--);
                 }
@@ -78,7 +79,7 @@ Object.assign(Math,{
         } else return[n];
     },
     factorial(n){
-        return!(n%1)&&n>0?n*Math.factorial(n-1):1;
+        return!Math.mod(n,1)&&n>0?n*Math.factorial(n-1):1;
     }
 });
 Object.assign(console,{

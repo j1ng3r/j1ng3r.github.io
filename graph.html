@@ -1,0 +1,37 @@
+<!DocType Html>
+<html>
+    <head>
+        <script>
+            c=document.createElement("canvas");
+            c.width=1000;
+            c.height=800;
+            ctx=c.getContext("2d");
+            function b(n,m){
+                var a=[];
+                a[-1]=n;
+                a[-2]=0;
+                for(var i=0;i<1000;i++){
+                    a.push(a[i-1]+a[i-2]-m*i+3);
+                }
+                return a[999]>0?"#f00":"#00f";
+            }
+            x=0;
+            y=0;
+            function draw(){
+                for(var i=0;i<1;i++){
+                    for(x=0;x<c.width;x++){
+                        ctx.fillStyle=b(y/256,x/100);
+                        ctx.fillRect(x,y,1,1);
+                    }
+                    y++;
+                }
+                if(y<c.height)window.requestAnimationFrame(draw);
+            }
+            window.onload=function(){
+                document.body.appendChild(c);
+                window.requestAnimationFrame(draw);
+            };
+        </script>
+    </head>
+    <body></body>
+</html>

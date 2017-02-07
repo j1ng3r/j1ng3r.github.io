@@ -1,8 +1,8 @@
 function Cost(O){
     var C={};
-    C.production=1/O.production;
-    C.efficiency=1-O.efficiency;
-    C.weight=O.weight;
-    C.cost=Math.log(O.cost);
-    return C.efficiency*(C.production+C.weight+C.cost);
+    C.production=1/O.rate;
+    C.efficiency=1/O.eff;
+    C.weight=Math.log(Math.sq(O.weight)+1);
+    C.time=1/O.time
+    return C.efficiency*(C.production+C.weight+C.time);
 }

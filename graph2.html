@@ -1,0 +1,56 @@
+<!DocType Html>
+<html>
+    <head>
+        <style>
+            body,div,canvas,input,dav {
+                margin:0px;
+                padding:0px;
+                font-family: monospace;
+            }
+            input {
+                width:40px;
+                border:none;
+            }
+            div,canvas{
+                border:1px solid black;
+            }
+            #sb{
+                width:150px;
+                padding:5px;
+            }
+            #top10{
+                display:flex;
+            }
+            #equd{
+                padding:5px;
+            }
+            span:focus,input:focus,dav:focus {
+                outline:0;
+            }
+        </style>
+        <script>
+            window.onload=function(){
+                var edits=document.querySelectorAll("num");
+                for(var i in edits){
+                    edits[i].contentEditable=true;
+                    edits[i].addEventListener("input",function(){
+                        this.innerHTML=this.innerHTML.replace(/[^.\d]/,"");
+                        if(!this.innerHTML.length)this.innerHTML=0;
+                    });
+                }
+            };
+        </script>
+    </head><body>
+        <div id="content">
+            <dav id='top10'>
+                <div id="sb">
+                    Real: <num id="re" contenteditable>2</num><br>
+                    Imag: <num id="im" contenteditable=""><br>
+                </div>
+                <canvas id="c"></canvas>
+                <canvas id="res"></canvas>
+            </dav>
+            <div id="equd" onclick="eq.focus()">f(z) = <span id="eq" contenteditable>z</span></div>
+        </div>
+    </body>
+</html>
