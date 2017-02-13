@@ -11,42 +11,53 @@ K={
         },
         "iron":{
             rho:"9.71e-8 ohm m",
-            cost:"0.00446 USD/g",
+            cost:"4.46 USD/kg",
             density:"7.87 g/cm3",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"5e-6 ohm m^2",//false
+            anode:"4.5e-6 ohm m^2",//false
+        },
+        "NiFeO2":{
+            rho:"8.36e-8 ohm m",//average between iron and nickel
+            cost:"55 USD/kg",//more than average between iron and nickel
+            density:"8.39 g/cm3",//avg of Ni & Fe
+            anode:"3e-6 ohm m^2",//false
+            cathode:"5e-6 ohm m^2"//false
         },
         "copper":{
             rho:"1.68e-8 ohm m",
             cost:"5.8762 USD/kg",
             density:"8.96 g/cm3",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"9e-6 ohm m^2",//false
+            anode:"10e-6 ohm m^2"//false
         },
         "aluminum":{
             rho:"2.65e-8 ohm m",
             cost:"0.83 USD/lb",
             density:"2.70 g/cm3",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"3.5e-5 ohm m^2",//false
+            anode:"4e-5 ohm m^2",//false
         },
         "graphene":{
-            rho:"10e-6 ohm cm",
+            rho:"1e-6 ohm cm",
             cost:"100 USD/g",
             density:"2.0 g/cm3",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"6e-5 ohm m^2",//false
+            anode:"6e-5 ohm m^2",//false
         },
         "nickel":{
             rho:"7.0e-8 ohm m",
             cost:"77 USD/kg",
             density:"8.908 g/cm3",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"3e-6 ohm m^2",//false
+            anode:"4e-6 ohm m^2",//false
         }
     },
     mass(){
         return math.unit(36.03056,"g/mol");
+    },
+    cost:{
+        H2O:math.unit("1 USD/kg"),
+        Na2CO3:math.unit("10 USD/kg")
     },
     d:{
         H2O:math.unit("0.9982 kg/L"),
@@ -56,6 +67,7 @@ K={
     room_temperature:math.eval("65 degF to K"),
     ideal_cell_voltage:math.unit("1.23 V"),
     cell_voltage:math.unit("1.48 V"),
+    gravity:math.unit("9.81 m/s^2"),
     //Other
     "H2":{
         "kg/L":8.988e-5,
@@ -70,10 +82,14 @@ K={
         electron_mols:4,
         H2_mols:2,
     },
-    gravity:9810,//mm/s^2
     getWaterDensity(t){return(-0.6013*t*t+3.6544*t-9.2849)/100000+1;},
     flow_constant:1,
 };
+K.maxFlow=math.divide(math.sqrt(
+    math.multiply(8,K.gravity,math.subtract(K.d.H2O,K.d.gas),K.d.gas)
+),K.mass("2H2+O2"));
+K.flow=math.multiply(4/3,math.faraday,K.maxFlow);//58869.78696862518 A/cm^2.5
+K.flow=math.unit("60 A / cm^2.5");//Not true
 +function(i,j){
     for(i in K.MAT){
         for(j in K.MAT[i]){

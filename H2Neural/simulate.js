@@ -1,6 +1,6 @@
-//DONE TO-DO use math library, use units, and implement
-function Simulate(O){
-    //Converting inputs into units
+function Simulate(I){
+    var O=Object.deepCopy(I);
+    O.electrolyte_weight=math.divide(O.water_weight,1/O.percentMass-1);
     O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
     O.getGasDensity=_=>math.divide(K.mass("2H2O"),math.multiply(3,O["L/mol"](_)));
     O.xtra_water_weight=math.subtract(O.water_weight,math.multiply(O.plate_dist,O.plate_length,O.plate_height,K.d.H2O));
@@ -26,10 +26,9 @@ function Simulate(O){
     //The energy required to heat or cool the system
     O.temp_energy=math.multiply(math.abs(math.subtract(O.temperature,K.room_temperature)),K["J/Cal"],O.water_weight);
 
-    /*/The maximum outflow of hydrogen in grams per second (proof below)
-    O.maxFlow=math.multiply(O.plate_dist,O.plate_length,math.sqrt(
-        math.multiply(8,O.plate_height,K.G,math.subtract(K.d.H2O),K.d.gas),K.d.gas)
-    ),1/3);//*/
+    //The maximum outflow of hydrogen in grams per second (proof below)
+    O.maxFlow=math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.maxFlow);
+    //*/
 
     O.cathodeR=math.divide(O.mat.cathode,O.plate_area);
     O.anodeR=math.divide(O.mat.anode,O.plate_area);
@@ -39,26 +38,22 @@ function Simulate(O){
         math.multiply(O.plate_height,O.plate_width)
     );
 
-    O.percentMass=math.divide(O.electrolyte_weight,math.add(O.electrolyte_weight,O.water_weight));
-
     //approx based on data
     O.datafit=math.eval("f(x)=(30275+35858000x)/(x+25679)*e^(-16.247x)");
-    O.conductivity=math.unit(O.temperature.toNumber()*O.datafit(O.percentMass),"mS/cm");
-    if(O.conductivity<0)O.conductivity=0;
-    O.waterR=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));
+    O.conductivity=math.unit(math.divide(O.temperature,K.room_temperature)*O.datafit(O.percentMass),"mS/cm");
+    if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm");
+    O.H2O_R=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));//k3
+    O.exteriorR=math.add(O.plate_R,O.cathodeR,O.anodeR,O.plate_R);//k2
+    O.flowR=math.divide(O.voltage,math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.flow));//k1
+    var a=O.flowR.toNumber("ohm"),b=O.exteriorR.toNumber("ohm"),c=O.H2O_R.toNumber("ohm");
 
+    O.percentWater=(b-a-c+Math.sqrt((b-a)*(b-a)+c*c+2*c*(a+b)))/(2*b);
+    O.waterR=math.divide(O.H2O_R,O.percentWater);
     //Solving for the resistance of a single system, assuming 2 plates
-    //console.log(O.plate_R,O.cathodeR,O.waterR,O.anodeR,O.plate_R);
-    O.systemR=math.add(O.plate_R,O.cathodeR,O.waterR,O.anodeR,O.plate_R);
+    O.systemR=math.add(O.waterR,O.exteriorR);
 
     //TODO, assuming 2 plates
     O.resistance=O.systemR;
-
-    /*/Outdated, need to build better equation
-    O.production=function(h,g,x){//mols/s
-        h=Math.sqrt(1-Math.sq(h/g));
-        return(x+g-Math.sqrt(x*x-2*g*h*x+g*g))/(1+h);
-    }(K.flow_constant,O.maxFlow,O.theo_production);//*/
 
     //I=V/R
     O.amps=math.divide(O.voltage,O.resistance);
@@ -87,6 +82,18 @@ function Simulate(O){
 
     //The total weight of the system
     O.weight=math.add(O.water_weight,O.electrolyte_weight,O.plate_weight);
+
+    //Calculating cost
+    O.plate_cost=math.multiply(O.plate_weight,O.mat.cost);
+    O.water_cost=math.multiply(O.water_weight,K.cost.H2O);
+    O.electrolyte_cost=math.multiply(O.electrolyte_weight,K.cost[O.electrolyte_name]);
+    O.cost=math.add(O.plate_cost,O.water_cost,O.electrolyte_cost);
+
+    //Calculating size
+    O.system_width=math.add(math.multiply(O.plate_dist,O.number_of_plates-1),math.multiply(O.plate_width,O.number_of_plates));
+    O.water_size=math.multiply(math.pow(math.divide(O.xtra_water_weight,K.d.H2O),1/3),3);
+    O.size=math.add(O.system_width,O.plate_length,O.plate_height);
+
     var S={};
     for(var i in O){
         S[i]=typeof O[i]=="function"?O[i]:O[i].toString();
@@ -96,7 +103,9 @@ function Simulate(O){
         rate:O.rate.toNumber("mol/s"),
         time:O.production_time.toNumber("s"),
         eff:O.efficiency,
-        weight:O.weight.toNumber("g")
+        weight:O.weight.toNumber("g"),
+        cost:O.cost.toNumber("USD"),
+        size:O.size.toNumber("mm")
     };
     return ret;
 }
@@ -111,7 +120,7 @@ args=[
     "number_of_plates",
 
     "electrolyte_name",
-    "electrolyte_weight",
+    "percentMass",
     "temperature",
     "water_weight"
 ];
@@ -169,7 +178,27 @@ args=[
          =plate_dist*plate_length*sqrt(8HG*(d(H2O)-d(H2))*d(H2))/3
         mol=g/mass(H2)=plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
     thus, the maximum amount of hydrogen able to leave a set of plates is equivalent to
-        plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
+        P_max=plate_dist*plate_length*sqrt(8*plate_height*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
+    To conserve time, let us define:
+        X=sqrt(8*G*(d(H2O)-d(H2))*d(H2))/(3*mass(H2))
+    such that
+        P_max=plate_dist*plate_length*sqrt(plate_height)*X
+    It is safe to assume that the percent water W_P is
+        W_P=1-rate/P_max;
+    We now re-write rate as its calculated form and solve for W_P
+        W_P=1-(I*3/4F)/P_max #F=faraday constant
+        W_P=1-((V*3/4F)/P_max)/R
+        W_P=1-((V*3/4F)/P_max)/(2R_E+R_C+R_A+R_W)
+        W_P=1-((V*3/4F)/P_max)/(2R_E+R_C+R_A+plate_dist/(C*plate_height*plate_length))
+            C=f(T,K)*W_P
+        W_P=1-((V*3/4F)/P_max)/(2R_E+R_C+R_A+D/(f(T,K)*W_P*H*L))
+            X=sqrt(8*G*(d(H2O)-d(H2))*d(H2))/(3*mass(2H2O))
+            x=8F*sqrt(2*G*(d(H2O)-d(H2))*d(H2))/(3*mass(2H2O))
+            K1=V*3/(4F*P_max)=V*3/(4F*S*L*sqrt(H)*X)=V/(SL*sqrt(H)*x)
+            K2=2R_E+R_C+R_A
+            K3=S/(f(T,K)*H*L)
+        W_P=1-K1/(K2+K3/W_P);
+        W_P=1-((V*3/4F)/P_max)/(2R_E+R_C+R_A+1/*plate_dist/())
 ************************************************
 Presentation:
     Why/What?

@@ -2,17 +2,6 @@
 window.AI=function(){
     function AI(type){
         this.type=type||"any";
-        this.geneCount=0;
-        this.iterationCount=0;
-        this.genes=null;
-        this.geneNames=[];
-        this.geneProperties={};
-        this.geneProp=null;
-        this.simulation={
-            func(){},
-            args:[],
-            return(){}
-        };
         return this;
     }
     function Gene(properties){
@@ -94,6 +83,21 @@ window.AI=function(){
     });
     Object.assign(AI.prototype,{
         DEBUG:false,
+        geneCount:0,
+        iterationCount:0,
+        genes:null,
+        geneProp:null,
+        geneProperties:{},
+        geneNames:[],
+        checkpoint:{
+            func(){},
+            gen:Infinity
+        },
+        simulation:{
+            func(){},
+            args:[],
+            return(){}
+        },
         debug(){
             this.DEBUG=true;
             return this;
@@ -163,6 +167,13 @@ window.AI=function(){
             }
             return this;
         },
+        defineCheckPoint(func,gen){
+            this.checkpoint={
+                func:func,
+                gen:Math.floor(gen)||1,
+            };
+            return this;
+        },
         _createNewGenes(_,j,i){
             this.genes=[];
             for(i=0;i<this.geneCount;i++)
@@ -203,8 +214,21 @@ window.AI=function(){
             }
             return this;
         },
+        getGenes(){
+            var gene,g=[];
+            for(i in this.genes){
+                gene=this.genes[i];
+                g[i]={
+                    cost:gene.cost,
+                    data:{}
+                };
+                for(j in gene.data)
+                    g[i].data[j]=gene.getValue(j);
+            }
+            return g;
+        },
         execute(){
-            var i,j,k,args,gene,val,g=[];
+            var i,j,k,args,gene,val;
             this._defineGeneProperties()._createNewGenes();
             for(this.iterations=0;this.iterations<this.iterationCount;this.iterations++){
                 this.genes=this.cloneFunc(new Proxy(this,{
@@ -218,23 +242,15 @@ window.AI=function(){
                         args.push(gene.getValue(k));
                     this.log(args);
                     val=this.simulation.func.apply({},args);
-                    if(isNaN(val)){console.error(`Input function ${this.simulation.func.name} returned NaN with the given arguments:`,args);throw new Error();}
+                    if(isNaN(val)){this.error=args;console.error(`Input function ${this.simulation.func.name} returned NaN with the given arguments:`,args);throw new Error();}
                     gene.cost=val;
                 }
                 this.genes.sort(function(a,b){return a.cost-b.cost;});
+                if(!Math.mod(this.iterations,this.checkpoint.gen))
+                    this.checkpoint.func(this.getGenes());
             }
             this.log(this.genes);
-            for(i in this.genes){
-                gene=this.genes[i];
-                g[i]={
-                    cost:gene.cost,
-                    data:{}
-                };
-                for(j in gene.data){
-                    g[i].data[j]=gene.getValue(j);
-                }
-            }
-            return this.simulation.return(g);
+            return this.simulation.return(this.getGenes());
         }
     });
     return AI;

@@ -1,16 +1,31 @@
-(new AI)
-    .defineGeneCount(100)
-    .defineIterations(300)
-    .defineCostFunction(function(...a){
-        var o={},i;
-        for(i in a)
-            o[args[i]]=a[i];
-        return Cost(Simulate(o));
-    },args)
-    .defineReproduction("linear",5)
+function Do(a){
+    var o={},i;
+    for(i in a)
+        o[args[i]]=a[i];
+    return Simulate(o);
+}
+function DO(...a){
+    var A=Do(a);
+    if(window.Cost)
+        return Cost(A);
+    return-Util(A);
+}
+ai=new AI;
+ai
+    .defineGeneCount(60)
+    .defineIterations(304)
+    .defineCostFunction(DO,args)
+    .defineReproduction("linear",7)
+    .defineCheckPoint(function(genes){
+        genes=genes[0];
+        var res="Cost: "+genes.cost;
+        for(var i in genes.data)res+=`\n${i}: ${genes.data[i]}`;
+        console.log(res);
+    },16)
     .defineCompletionFunction(function(genes){
         var gene,i,j;
         Q=Object.deepCopy(genes);
+        M=Simulate(Q[0].data);
         for(i in genes){
             gene=genes[i];
             for(j in gene.data)
@@ -20,7 +35,7 @@
     })
     .defineGeneProperties({
         makeNewProb:0.01,
-        mutProb:0.4,
+        mutProb:0.3,
         resetProb:0.1
     },{
         "voltage":{
@@ -36,19 +51,19 @@
             returnFunc:_=>math.unit(Math.exp(_),"mm")
         },
         "plate_width":{
-            minValSoft:-5,
+            minVal:0,
             maxValSoft:5,
             maxMut:0.5,
             returnFunc:_=>math.unit(Math.exp(_),"mm")
         },
         "plate_length":{
-            minValSoft:1,
+            minVal:0,
             maxValSoft:11,
             maxMut:0.5,
             returnFunc:_=>math.unit(Math.exp(_),"mm")
         },
         "plate_height":{
-            minValSoft:-1,
+            minVal:0,
             maxValSoft:9,
             maxMut:0.5,
             returnFunc:_=>math.unit(Math.exp(_),"mm")
@@ -62,11 +77,11 @@
         "electrolyte_name":{
             array:["Na2CO3"]
         },
-        "electrolyte_weight":{
-            minValSoft:-2,
-            maxValSoft:3,
-            maxMut:0.3,
-            returnFunc:_=>math.unit(Math.exp(_),"g")
+        "percentMass":{
+            minVal:0,
+            maxValSoft:0.1,
+            maxVal:1,
+            maxMut:0.01
         },
         "temperature":{
             minVal:50,
@@ -86,5 +101,7 @@
         maxMut:0.1,
         returnFunc:_=>_
     })*/
-    .execute()
+
+    .execute(console.time())
 ;
+console.timeEnd();
