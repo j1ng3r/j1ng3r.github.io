@@ -12,20 +12,21 @@ function DO(...a){
 }
 ai=new AI;
 ai
-    .defineGeneCount(60)
-    .defineIterations(304)
+    .defineGeneCount(40)
+    .defineIterations(200)
     .defineCostFunction(DO,args)
-    .defineReproduction("linear",7)
+    .defineReproduction("linear",5)
     .defineCheckPoint(function(genes){
         genes=genes[0];
         var res="Cost: "+genes.cost;
         for(var i in genes.data)res+=`\n${i}: ${genes.data[i]}`;
         console.log(res);
-    },16)
+    },25)
     .defineCompletionFunction(function(genes){
         var gene,i,j;
         Q=Object.deepCopy(genes);
         M=Simulate(Q[0].data);
+        m=M.data;
         for(i in genes){
             gene=genes[i];
             for(j in gene.data)

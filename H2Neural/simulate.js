@@ -42,13 +42,14 @@ function Simulate(I){
     O.datafit=math.eval("f(x)=(30275+35858000x)/(x+25679)*e^(-16.247x)");
     O.conductivity=math.unit(math.divide(O.temperature,K.room_temperature)*O.datafit(O.percentMass),"mS/cm");
     if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm");
-    O.H2O_R=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));//k3
-    O.exteriorR=math.add(O.plate_R,O.cathodeR,O.anodeR,O.plate_R);//k2
-    O.flowR=math.divide(O.voltage,math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.flow));//k1
-    var a=O.flowR.toNumber("ohm"),b=O.exteriorR.toNumber("ohm"),c=O.H2O_R.toNumber("ohm");
 
-    O.percentWater=(b-a-c+Math.sqrt((b-a)*(b-a)+c*c+2*c*(a+b)))/(2*b);
+    O.H2O_R=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));
+    O.exteriorR=math.add(O.plate_R,O.cathodeR,O.anodeR,O.plate_R);
+    O.flowR=math.divide(O.voltage,math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.flow));
+    var a=O.flowR.toNumber("ohm"),b=O.exteriorR.toNumber("ohm"),c=O.H2O_R.toNumber("ohm");
+    O.percentWater=Math.abs(b-a-c+Math.sqrt((b-a)*(b-a)+c*c+2*c*(a+b)))/(2*b);
     O.waterR=math.divide(O.H2O_R,O.percentWater);
+
     //Solving for the resistance of a single system, assuming 2 plates
     O.systemR=math.add(O.waterR,O.exteriorR);
 
@@ -78,7 +79,7 @@ function Simulate(I){
     O.watts=math.add(math.multiply(O.voltage,O.amps),O.temp_watts);
 
     //Energy out/energy in. Unitless
-    O.efficiency=math.divide(O.out_watts,O.watts);
+    O.efficiency=math.divide(O.out_watts,O.watts)||0;
 
     //The total weight of the system
     O.weight=math.add(O.water_weight,O.electrolyte_weight,O.plate_weight);

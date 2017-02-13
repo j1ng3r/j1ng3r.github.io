@@ -13,7 +13,7 @@ window.AI=function(){
             return Math.rand(Number.eval(prop.minValSoft),Number.eval(prop.maxValSoft));
         },
         makeNew(prop){
-            _=new Gene(prop);
+            var _=new Gene(prop),j;
             for(j of Object.keys(prop))
                 _.data[j]=Gene.resetValue(prop[j]);
             return _;
