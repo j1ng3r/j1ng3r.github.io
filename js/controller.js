@@ -8,7 +8,7 @@ window.Controller=function(){
 		Controller.window.addEventListener("keydown",this._event.bind(this));
 		Controller.window.addEventListener("keyup",this._event.bind(this));
 	}
-	Controller=Object.assign(Controller,{
+	Object.assign(Controller,{
 		prototype:Object.assign(Controller.prototype,{
 			input:{},
 			events:{},
@@ -24,23 +24,20 @@ window.Controller=function(){
 			},
 			getInput(n){
 				if(!this.scheme.hasOwnProperty(n))throw`No property ${n} exists on this controller.`;
-				var _ = this.scheme[n].split("|"),
-				a=Controller.window.navigator.getGamepads(),
-				b,validGamepads=[],i;
-				for(i in a)
+				for(var _ = this.scheme[n].split("|"),a=Controller.window.navigator.getGamepads(),b,validGamepads=[],i=0,j;i<a.length;i++)
 					if(a[i]&&a[i].buttons&&a[i].buttons.length)
 						validGamepads.push(a[i]);
-				for(i of _){
-					i=i.trim();
+				for(j=0;j<_.length;j++){
+					i=_[j].trim();
 					b=(i.match(/\d+/g)||[])[1];
 					if(i.slice(0,3)=="Pad"){
-						if(a=validGamepads[i[3]])
-							this.input[n]=(i.slice(4,8)!="Axis"
-								?a.buttons[b].value
-								:i.match(/[+-]$/)
-									?Math.max(0,(i.slice(-1)+"1")*a.axes[b])
-									:a.axes[b]
-							);
+						if(a=validGamepads[i[3]])this.input[n]=(
+							i.slice(4,8)!="Axis"?
+								a.buttons[b].value
+							:/[+-]$/.test(i)?
+								Math.max(0,(i.slice(-1)+"1")*a.axes[b]):
+								a.axes[b]
+						);
 					}
 					if(this.input[n]){
 						return this.input[n];
@@ -93,8 +90,8 @@ window.Controller=function(){
 				var n=Controller.parseEvent(e);
 				if(this.defaultPrevented&&(
 					(this.defaultWhiteList.length&&!this.defaultWhiteList.includes(n))||
-					(this.defaultBlackList.length&&this.defaultBlackList.includes(n)))||
-					!(this.defaultBlackList.length||this.defaultWhiteList.length)){
+					(this.defaultBlackList.length&&this.defaultBlackList.includes(n))||
+					!(this.defaultBlackList.length||this.defaultWhiteList.length))){
 						e.preventDefault();
 				}
 				if(e.type.slice(0,3)=="key")
@@ -115,14 +112,13 @@ window.Controller=function(){
 			}
 		},
 		buttonNames:[],
-		getSchemeByName(name){
-			var o,d=Controller.get().split(']'),a;
-			for(a in d)
+		getSchemeByName(name,o,d=Controller.get().split(']'),a=0){
+			for(;a<d.length;a++)
 				if(d[a]!=(o=d[a].replace(RegExp(`^${name}\\[`),"")))
 					return {
 						data:o,
-						start:+a,
-						end:+a+o.length
+						start:a,
+						end:a+o.length
 					};
 			return null;
 		},
