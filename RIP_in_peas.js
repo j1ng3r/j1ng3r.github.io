@@ -64,15 +64,3 @@ Object.assign(Plant.prototype,{
 
 var RoundYellow=new Gamete([new Chromosome("YR")]).cross(new Gamete([new Chromosome("yR")]));
 var WrinkledGreen=new Gamete([new Chromosome("yr")]).cross(new Gamete([new Chromosome("yr")]));
-
-
-
-
-a=`
-
- _____
-/ooooo\
-L######>
- O    O
-...........................
-`;

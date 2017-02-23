@@ -1,0 +1,57 @@
+<!DocType Html>
+<html>
+    <head>
+        <link href="js/fullscreen.css" rel="stylesheet">
+        <script src="js/expand.js"></script>
+        <script src="js/point.js"></script>
+        <script>
+            var c=document.createElement("canvas"),ctx=c.getContext("2d");
+            c.width=1000;
+            c.height=800;
+            function draw(str,x,y,s){
+                ctx.fillStyle="#fff";
+                ctx.fillRect(0,0,c.width,c.height);
+                ctx.fillStyle="#000";
+                str=str.toLowerCase();
+                var A=["itaonwv","ebdfklmqrsuvxy"],i,pos=new Point(x,y),a=0;
+                for(i in str){
+                    if(A[0].includes(str[i])){
+                        a+=Math.PI/2;
+                    } else if(A[1].includes(str[i])){
+                        a-=Math.PI/2;
+                    }
+                    pos.addS(s*Math.cos(a),s*Math.sin(a));
+                    ctx.fillRect(pos.x-s/2,pos.y-s/2,s,s);
+                }
+            }
+            window.onload=function(){
+                document.body.appendChild(c);
+                f=_=>
+                draw(
+`california ymca model legislature and court	Hon. ariana trujillo (sixty-nineth youth governor, presiding)
+sacramento, california
+february
+It is essential to the California YMCA Youth and GOvernment that each participant enjoys the right to a safe, high quality environment.
+Being responsible for one's own behavior at all times is a necessary part of self-government.
+It is critical that all delegates, advisors and program volunteers to act responsibly.
+The Code of Conduct shall be obversed by both youth and adults.
+There will be no double standards.
+By choosing to participate in YNG's programs, each participant (and their parent or guardian should it apply) agrees that they have read, understand, and will follow the Code of Conduct while attending YNG conferences.
+Some delegations may have additional standards but all YNG participants are held to the Code of Conduct listed below.
+Each participant is accountable for preserving the reputation and high standard of their delegation as well as that of California YMCA Youth & Government.
+
+But California can make a different choice, a better choice.
+We can choose to protect our citizens.
+The quick brown fox jumped over the lazy dog's back.
+Lorum ipsum dolor sit amet is a common phrase used to fill space, but still show the structure of a sentence.
+The real minimum wage is, in fact, the minimum wage. It's just that a lot of people are unemployed.
+
+The number 42 is quite an interesting number.
+For one, it is the second smallest number that is the product of three distinct primes, the only other being the number thirty.
+It is the average of the twin primes 41 and 43.
+`,300,300,3)
+            }
+        </script>
+    </head>
+    <body></body>
+</html>
