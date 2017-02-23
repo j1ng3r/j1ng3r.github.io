@@ -12,7 +12,7 @@ var pad=new Controller("jigsaw",{
     y:0,
     ox:-1,
     oy:-1,
-    scale:0.5,
+    scale:1,
     width:0,
     height:0,
     playing:0
@@ -22,8 +22,8 @@ camera.setCenterPercent({x:0,y:0});
 pad.preventDefault();
 function getXY(n){
     return{
-        x:Math.floor(n/map.cols),
-        y:n%map.cols
+        x:Math.floor(n/map.rows),
+        y:n%map.rows
     };
 }
 function loadImage(){
@@ -94,35 +94,3 @@ window.onload=function(){
     document.body.appendChild(camera.c);
     interval(step,draw,60);
 };
-/*
-
-function init(){
-    var image = camera.createSprite("base",dir);
-    image.onload = function(){
-        for(var x=0,y;x<rows;x++){
-            for(y=0;y<cols;y++){
-                var canvas = document.createElement('canvas');
-                canvas.width = w;
-                canvas.height = h;
-                var context = canvas.getContext('2d');
-                context.drawImage(image, x * w, y * h, w, h, 0, 0, canvas.width, canvas.height);
-                camera.createSprite(x+","+y,canvas.toDataURL());
-            }
-        }
-    };
-    document.body.appendChild(camera.c);
-    interval(step,draw,60);
-}
-function step(){
-
-}
-function draw(){
-    for(var x=0,y;x<rows;x++){
-        for(y=0;y<cols;y++){
-            camera.draw(x+','+y,camera.c.width-x*w,camera.c.height-y*h);
-        }
-    }
-}
-
-window.onload=init;
-*/

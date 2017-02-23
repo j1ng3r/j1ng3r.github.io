@@ -162,14 +162,18 @@ window.camera={
 		if(typeof name=="object")return name;
 		else {
 			if(this.sprites.hasOwnProperty(name))return this.sprites[name];
-			var a=Object.assign(new Image,{src:name});
-			if(this.center.type=="XY")a.center={
-				x:this.center.x,
-				y:this.center.y
-			}; else a.center={
-				x:a.width*this.center.x,
-				y:a.height*this.center.y
-			};
+			try{
+				var a=Object.assign(new Image,{src:name});
+				if(this.center.type=="XY")a.center={
+					x:this.center.x,
+					y:this.center.y
+				}; else a.center={
+					x:a.width*this.center.x,
+					y:a.height*this.center.y
+				};
+			}catch(e){
+				throw new Error(`No file with name ${name} exists.`);
+			}
 			return a;
 		}
 	}
