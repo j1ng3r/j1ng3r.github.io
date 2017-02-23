@@ -1,19 +1,143 @@
 <!DocType Html>
 <html>
-<head>
-	<title>Controller.js tester</title>
-	<script src="libaries/controller.js"></script>
-	<script src="libaries/console.js"></script>
-	<script>
-		var con = new controller("Player1","UP: Up Arrow, DOWN: Down Arrow, RIGHT:Right Arrow,LEFT:Left Arrow,A: Z"),
-		c=document.createElement('canvas'),ctx=c.getContext('2d');
-		c.width=800;
-		c.height=600;
-		c.snas||window.location=window.location;
-		window.onload=function(){
-			document.body.appendChild(c);
-		};
-	</script>
-</head>
-<body></body>
+    <head>
+        <title>Gamepad data</title>
+        <style>
+            html,body {
+                margin:5px;
+                padding:0px;
+                line-height:20px;
+            }
+            btn {
+                font-weight:bold;
+                border:2px solid black;
+                width:20px;
+                height:20px;
+                border-radius:100%;
+                text-align:center;
+                display:inline-block;
+                margin:5px;
+            }
+            shldr {
+                font-weight:bold;
+                border:2px solid black;
+                width:60px;
+                height:20px;
+                border-radius:10px;
+                text-align:center;
+                display:inline-block;
+                margin:5px;
+            }
+            spec {
+                font-weight:bold;
+                border:2px solid black;
+                width:60px;
+                height:20px;
+                text-align:center;
+                display:inline-block;
+                margin:5px;
+            }
+            trigr {
+                font-weight:bold;
+                border:2px solid black;
+                width:60px;
+                height:40px;
+                border-radius:10px;
+                text-align:center;
+                display:inline-block;
+                margin:5px;
+                line-height:13px;
+                padding:0px;
+            }
+            .true {
+                color:#fff;
+                background:#000;
+            }
+            .false {
+                color:#000;
+                background:#fff;
+            }
+            #D-pad {
+                text-align:center;
+                width:90px;
+                height:90px;
+            }
+            .big-circle {
+                border-radius:100%;
+                border:2px solid black;
+                width:60px;
+                height:60px;
+                margin-left:15;
+            }
+            .controller {
+                position:relative;
+                top:27px;
+                left:27px;
+                width:6px;
+                height:6px;
+                border-radius:100%;
+                background:black;
+            }
+            #mst {
+                margin-left:10px;
+                margin-bottom:5px;
+            }
+            #cst {
+                margin-left:21px;
+                margin-bottom:5px;
+            }
+            #wrapper {
+                width: 200px;
+                overflow: auto;
+            }
+            #m-stick {
+                width: 100px;
+                float:left;
+            }
+            #c-stick {
+                float: left;
+            }
+        </style>
+        <script>
+            var g=null;
+            function d(a){return document.getElementById(a);}
+            function b(a,n){d(a).className=""+g.buttons[n].pressed;return b;}
+            function t(a,n){d(a).style.backgroundColor="#"+(255-g.buttons[n].value*200).toString(16).slice(0,2).repeat(3);}
+            function s(a,n){d(a).style.left=g.axes[n]*27+27;d(a).style.top=g.axes[n+1]*27+27;}
+            setInterval(function(a){
+                g=navigator.getGamepads()[0];
+                b("A",0)("B",1)("X",2)("Y",3)("Sl",4)("Sr",5)('[',8)(']',9)("Du",12)("Dd",13)("Dl",14)("Dr",15);
+                t("Tl",6);
+                t("Tr",7);
+                s("M",0);
+                s("C",2);
+            },17);
+        </script>
+    </head>
+    <body>
+        <btn id="A">A</btn><btn id="B">B</btn><btn id="X">X</btn><btn id="Y">Y</btn>
+        <br><br>
+        <spec id="[">Back</spec><spec id="]">Start</spec>
+        <br><br>
+        <shldr id="Sl">Left</shldr><shldr id="Sr">Right</shldr>
+        <br><br>
+        <trigr id="Tl"><br>LT</trigr><trigr id="Tr"><br>RT</trigr>
+        <br><br>
+        <div id="D-pad">
+            <btn id="Du">↑</btn><br>
+            <btn id="Dl">←</btn> D <btn id="Dr">→</btn><br>
+            <btn id="Dd">↓</btn>
+        </div>
+        <br><br>
+        <div id="wrapper">
+        <div id="m-stick">
+        <div id="mst">Main Stick</div>
+        <div class="big-circle"><div id="M" class="controller"></div></div>
+        </div>
+        <div id="c-stick">
+        <div id="cst">C-Stick</div>
+        <div class="big-circle"><div id="C" class="controller"></div></div>
+        </div>
+        </div>
+    </body>
 </html>
