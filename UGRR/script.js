@@ -5,7 +5,7 @@ grid = new ROT.Display({
     width:width,
     height:50,
     fontSize:20,
-    fontFamily:"Ubuntu Mono",
+    fontFamily:"monospace",
     bg:"#000"
 });
 buf={x:2,y:1};
@@ -13,8 +13,11 @@ function draw(a,b,c){
     return grid.drawText(+a+buf.x,+b+buf.y,c);
 }
 key="";
-window.keydown=function(e){
+window.onkeydown=function(e){
     key=e.key;
+};
+font.onload=function(){
+    grid.setOptions({fontFamily:"Ubuntu Mono"});
 };
 //State controls
 state={
@@ -52,6 +55,7 @@ menus={
         title:"Credits",
         options:{
             "Marcus Luebke":"log: Marcus Luebke is still writing the game. How'd you get beta access?",
+            "Ondrej Zara":"log: The creator of ROT.js. His work provided the foundation for this text-based adventure.",
             "Back":"goto: title",
             "":"goto: secret"
         }
@@ -106,12 +110,13 @@ menus={
     "config":{
         title:"Start a New Game",
         options:{
-            "%f{red}Name":"prompt",
+            "%c{red}Name":"prompt",
         }
     }
 };
 for(let i in menus){
     menus[i].keys=Object.keys(menus[i].options);
+    menus[i].prompts=new Array(menus[i].keys.length).fill("");
 }
 
 //Commands
@@ -159,7 +164,7 @@ function step(){
     //Init
     grid.clear();
     menu=menus[state.name];
-    option=menu.keys[state.pos];
+    option=menu.keys[state.pos]+"";
     cmd=menu.options[option];
     dir={
         x:(key=="ArrowRight")-(key=="ArrowLeft"),
@@ -172,6 +177,16 @@ function step(){
             state.pos=Math.mod(state.pos+dir.y,menu.keys.length);
             state.prompt=false;
         }
+        if(!state.prompt){
+            draw(0,state.pos+1,"%c{#88f}>");
+        }
+        for(let i=0;i<menu.prompts.length;i++){
+            if(state.pos==i&&state.prompt){
+                draw((menu.keys[i]+"").length+2,i+1,": "+menu.prompts[i]);
+            } else if(menu.prompts[i].length){
+                draw((menu.keys[i]+"").length+2,i+1,": "+menu.prompts[i]);
+            }
+        }
         if((key==" "&&!state.prompt)||key=="Enter"){
             command(cmd);
         }
@@ -179,7 +194,6 @@ function step(){
         for(let i=0;i<menu.keys.length;i++){
             draw(2,i+1,menu.keys[i]);
         }
-        if(state.prompt)draw(0,state.pos+1,"%c{#88f}>");
     }
 
     //End
