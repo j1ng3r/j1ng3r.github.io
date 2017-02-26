@@ -2,24 +2,43 @@ D=5;
 function tetr(b,n){
     return n?Math.pow(2,tetr(b,n-1)):b;
 }
-function getVal(v){
-    var d,L=[],i,j,P=[[],[],[],[]];
+function getVal(v,D){
+    var d,L=[],i,j,P=[[],[],[],[]],V;
+    /*
+        v is an array storing values between 0 and 1.
+        D is the derivative you are finding
+        tetr is a function where
+            tetr(0.5,0)=0.5
+            tetr(0.5,1)=2^0.5
+            tetr(0.5,2)=2^2^0.5
+        d is an array of the arrays of all the points for each derivative=[
+            [-Infinity,0,1,2,4,16,65536],
+            [Infinity,1,1,2,12,65520],
+            [-Infinity,0,1,10,65508],
+            [Infinity,1,9,65498]
+        ]
+        L takes the log2 of each point in v
+        P[0] takes 2^ each point in v, then P[1] takes 2^ each point in P[0], etc
+        i and j are iterators
+        V stores the
+    */
     for(i in v){
         L.push(Math.log2(v[i]));
         for(j in P)
             P[j].push(tetr(v[i],+j+1));
     }
-    v=L.concat(v);
-    for(i in P)v=v.concat(P[i]);
-    d=[v];
+    d=[L.concat(v)];
+    for(i in P)d[0]=d[0].concat(P[i]);
     for(i=1;i<=D;i++){
         d[i]=[];
         for(j=0;j<d[i-1].length-1;j++)
             d[i][j]=v.length*(d[i-1][j+1]-d[i-1][j]);
     }
+    console.log(Q=d);
     return Math.min.apply(0,d.slice(~0)[0]);
 }
 S=[];
+
 function findMax(n,g){
     var list,data,arr,pos=new Array(n-1).fill(0),gen=0,dist,base,max,i,j;
     while(gen<g){
