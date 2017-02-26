@@ -41,7 +41,7 @@ function Simulate(I){
     //approx based on data
     O.datafit=math.eval("f(x)=(30275+35858000x)/(x+25679)*e^(-16.247x)");
     O.conductivity=math.unit(math.divide(O.temperature,K.room_temperature)*O.datafit(O.percentMass),"mS/cm");
-    if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm");
+    if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm"); 
 
     O.H2O_R=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));
     O.exteriorR=math.add(O.plate_R,O.cathodeR,O.anodeR,O.plate_R);
@@ -118,11 +118,6 @@ args=[
     "plate_length",
     "plate_height",
     "plate_material",
-    "number_of_plates",
-
-    "electrolyte_name",
-    "percentMass",
-    "temperature",
     "water_weight"
 ];
 

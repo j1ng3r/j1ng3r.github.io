@@ -106,6 +106,10 @@ window.AI=function(){
             if(this.DEBUG)console.log(a);
             return a;
         },
+        runFunction(f){
+            f();
+            return this;
+        },
         addGeneName(n){
             if(!this.geneNames.includes(n))this.geneNames.push(n);
             return this;

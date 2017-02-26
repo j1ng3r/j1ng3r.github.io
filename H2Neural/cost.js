@@ -1,9 +1,9 @@
 CONFIG={
     rate:1,
-    eff:1,
-    time:0.1,
+    eff:0.001,
+    time:0.001,
     weight:1,
-    cost:0.2,
+    cost:0.001,
     size:1
 };
 
@@ -16,24 +16,21 @@ C={
     cost:-CONFIG.cost
 };
 thresh={
-    size:10000,
-    cost:100,
-    weight:2000,
-    time:1800
+    size:1000,
+    cost:10000,
+    weight:10000,
+    time:1,
+    eff:0.001,
+    rate:0.04
 };
-for(var i in thresh)C[i]*=2*Math.PI;
 function Thresh(x){
-    return.5+Math.tanh(x)/2;
+    return(x-Math.sqrt(x*x+1))||0;
 }
 function Util(O){
-    var p=1,i,s=0;
+    var p=0,i;
     //pow and log were off by 2.5% in favor of log, so log is fine.
     for(i in C){
-        if(thresh.hasOwnProperty(i)){
-            p*=Thresh(C[i]*Math.log(O[i]/thresh[i]));
-        } else {
-            s+=C[i]*Math.log(O[i]*O[i]+1);
-        }
+        p+=Math.abs(C[i])*Thresh(C[i]*Math.log(O[i]/thresh[i]));
     }
-    return p*s;
+    return p;
 }

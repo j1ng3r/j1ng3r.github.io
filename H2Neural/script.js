@@ -10,10 +10,18 @@ function DO(...a){
         return Cost(A);
     return-Util(A);
 }
+Input=[];
 ai=new AI;
 ai
-    .defineGeneCount(40)
-    .defineIterations(200)
+    .defineGeneCount(60)
+    .defineIterations(360)
+    .runFunction(function(){
+        Input=["Genes: "+ai.geneCount,"Generations: "+ai.iterationCount];
+        for(var i in CONFIG)
+            Input.push(i+`: ${CONFIG[i]}, ${thresh[i]}`);
+        Input=Input.join("\n");
+        console.log(Input);
+    })
     .defineCostFunction(DO,args)
     .defineReproduction("linear",5)
     .defineCheckPoint(function(genes){
@@ -21,12 +29,13 @@ ai
         var res="Cost: "+genes.cost;
         for(var i in genes.data)res+=`\n${i}: ${genes.data[i]}`;
         console.log(res);
-    },25)
+    },60)
     .defineCompletionFunction(function(genes){
         var gene,i,j;
         Q=Object.deepCopy(genes);
         M=Simulate(Q[0].data);
         m=M.data;
+        m["L/s"]=math.unit(m["L/s"]).toNumber("L/min")+" L/min";
         for(i in genes){
             gene=genes[i];
             for(j in gene.data)

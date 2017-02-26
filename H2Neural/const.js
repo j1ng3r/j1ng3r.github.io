@@ -5,51 +5,51 @@ K={
         "platinum":{
             density:"21.45 g/cm3",
             rho:"1.06e-7 ohm m",
-            cathode:"1e-6 ohm m^2",//false
-            anode:"1e-6 ohm m^2",//false
+            cathode:"1e-5 ohm m^2",//false
+            anode:"1e-5 ohm m^2",//false
             cost:"31742.41 USD/kg",
         },
         "iron":{
             rho:"9.71e-8 ohm m",
             cost:"4.46 USD/kg",
             density:"7.87 g/cm3",
-            cathode:"5e-6 ohm m^2",//false
-            anode:"4.5e-6 ohm m^2",//false
+            cathode:"5e-5 ohm m^2",//false
+            anode:"4.5e-5 ohm m^2",//false
         },
         "NiFeO2":{
             rho:"8.36e-8 ohm m",//average between iron and nickel
             cost:"55 USD/kg",//more than average between iron and nickel
             density:"8.39 g/cm3",//avg of Ni & Fe
-            anode:"3e-6 ohm m^2",//false
-            cathode:"5e-6 ohm m^2"//false
+            anode:"3e-5 ohm m^2",//false
+            cathode:"5e-5 ohm m^2"//false
         },
         "copper":{
             rho:"1.68e-8 ohm m",
             cost:"5.8762 USD/kg",
             density:"8.96 g/cm3",
-            cathode:"9e-6 ohm m^2",//false
-            anode:"10e-6 ohm m^2"//false
+            cathode:"9e-5 ohm m^2",//false
+            anode:"10e-5 ohm m^2"//false
         },
         "aluminum":{
             rho:"2.65e-8 ohm m",
             cost:"0.83 USD/lb",
             density:"2.70 g/cm3",
-            cathode:"3.5e-5 ohm m^2",//false
-            anode:"4e-5 ohm m^2",//false
+            cathode:"3.5e-4 ohm m^2",//false
+            anode:"4e-4 ohm m^2",//false
         },
         "graphene":{
             rho:"1e-6 ohm cm",
             cost:"100 USD/g",
             density:"2.0 g/cm3",
-            cathode:"6e-5 ohm m^2",//false
-            anode:"6e-5 ohm m^2",//false
+            cathode:"6e-4 ohm m^2",//false
+            anode:"6e-4 ohm m^2",//false
         },
         "nickel":{
             rho:"7.0e-8 ohm m",
             cost:"77 USD/kg",
             density:"8.908 g/cm3",
-            cathode:"3e-6 ohm m^2",//false
-            anode:"4e-6 ohm m^2",//false
+            cathode:"3e-5 ohm m^2",//false
+            anode:"4e-5 ohm m^2",//false
         }
     },
     mass(){
