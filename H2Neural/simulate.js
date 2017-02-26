@@ -1,4 +1,5 @@
 function Simulate(I){
+    //Defining some preliminary, independant things
     var O=Object.deepCopy(I);
     O.electrolyte_weight=math.divide(O.water_weight,1/O.percentMass-1);
     O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
@@ -41,8 +42,9 @@ function Simulate(I){
     //approx based on data
     O.datafit=math.eval("f(x)=(30275+35858000x)/(x+25679)*e^(-16.247x)");
     O.conductivity=math.unit(math.divide(O.temperature,K.room_temperature)*O.datafit(O.percentMass),"mS/cm");
-    if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm"); 
+    if(O.conductivity.toNumber()<0)O.conductivity=math.unit("0 mS/cm");
 
+    //Calculating mass transfer
     O.H2O_R=math.divide(O.plate_dist,math.multiply(O.conductivity,O.plate_area));
     O.exteriorR=math.add(O.plate_R,O.cathodeR,O.anodeR,O.plate_R);
     O.flowR=math.divide(O.voltage,math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.flow));
@@ -95,6 +97,7 @@ function Simulate(I){
     O.water_size=math.multiply(math.pow(math.divide(O.xtra_water_weight,K.d.H2O),1/3),3);
     O.size=math.add(O.system_width,O.plate_length,O.plate_height);
 
+    //Cleaning and parsing O
     var S={};
     for(var i in O){
         S[i]=typeof O[i]=="function"?O[i]:O[i].toString();

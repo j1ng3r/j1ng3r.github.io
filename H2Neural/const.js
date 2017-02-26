@@ -68,22 +68,6 @@ K={
     ideal_cell_voltage:math.unit("1.23 V"),
     cell_voltage:math.unit("1.48 V"),
     gravity:math.unit("9.81 m/s^2"),
-    //Other
-    "H2":{
-        "kg/L":8.988e-5,
-    },
-
-    reaction:{
-        cell_voltage:1.48,
-        ideal_cell_voltage:1.23,
-        getOverPotential(V){
-            return V-K.reaction.ideal_cell_voltage;
-        },
-        electron_mols:4,
-        H2_mols:2,
-    },
-    getWaterDensity(t){return(-0.6013*t*t+3.6544*t-9.2849)/100000+1;},
-    flow_constant:1,
 };
 K.maxFlow=math.divide(math.sqrt(
     math.multiply(8,K.gravity,math.subtract(K.d.H2O,K.d.gas),K.d.gas)

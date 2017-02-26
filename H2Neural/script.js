@@ -105,13 +105,7 @@ ai
             maxMut:0.5,
             returnFunc:_=>math.unit(Math.exp(_),"g")
         }
-    })/*
-        maxValSoft:10,
-        minValSoft:-10,
-        maxMut:0.1,
-        returnFunc:_=>_
-    })*/
-
+    })
     .execute(console.time())
 ;
 console.timeEnd();
