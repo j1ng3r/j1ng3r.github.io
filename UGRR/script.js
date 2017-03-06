@@ -1,20 +1,36 @@
 //The grid and gamepad
-width=100;
-height=20;
+String.Length=s=>(s+"").replace(/%[a-z]\{[^}]*}/gi,"").length;
+var audio=Object.assign(new Audio,{
+    src:"UGRR/full_song.ogg",
+    autoplay:true,
+    onended(){this.play();}
+});
+width=69;
+height=29;
+blink=800;
+buf={x:2,y:1};
 grid = new ROT.Display({
-    width:width,
-    height:50,
-    fontSize:20,
+    width:width+buf.x*2,
+    height:60,
+    fontSize:18,
     fontFamily:"monospace",
     bg:"#000"
 });
-buf={x:2,y:1};
 function draw(a,b,c){
-    return grid.drawText(+a+buf.x,+b+buf.y,c);
+    if(Array.isArray(c)){
+        for(let i=0;i<c.length;i++){
+            sq(+a+i,b,c[i]);
+        }
+        return;
+    } else return draw(a,b,c.split(""));
+}
+function sq(x,y,s,c,b){
+    return grid.draw(+x+buf.x,+y+buf.y,s,c,b);
 }
 key="";
 window.onkeydown=function(e){
     key=e.key;
+    console.log("Key press:",key);
 };
 font.onload=function(){
     grid.setOptions({fontFamily:"Ubuntu Mono"});
@@ -23,149 +39,34 @@ font.onload=function(){
 state={
     name:"title",
     pos:0,
-    time:Date.now(),
+    now:Date.now(),
     changePos(v){
         this.pos+=v;
-        this.time=Date.now();
+        this.now=Date.now();
     },
     prompt:false
 };
 state[Symbol.toPrimitive]=_=>"menu";
-
-//Menus
-menus={
-    "title":{//jshint ignore:line
-        title:"The Aboveground Railroad",
-        options:{
-            "Start a New Game":"goto: config",
-            "Load a Game":"goto: load",
-            "About":"goto: about",
-            "Credits":"goto: credits",
-        }
-    },
-    "about":{
-        title:"About the Game",
-        options:{
-            "Inspiration":"log: This game was supposed to be based on the Oregon Trail, for US History.",
-            "Controls":"log: Well, you got this far.\nW goes up, X goes down, A goes left, D goes right, QEZC moves diagonally.\nS, Space, and Enter are select. R to refresh the page.",
-            "Back":"goto: title"
-        }
-    },
-    "credits":{
-        title:"Credits",
-        options:{
-            "Marcus Luebke":"log: Marcus Luebke is still writing the game. How'd you get beta access?",
-            "Ondrej Zara":"log: The creator of ROT.js. His work provided the foundation for this text-based adventure.",
-            "Back":"goto: title",
-            "":"goto: secret"
-        }
-    },
-    "secret":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret2",
-            "Back":"goto:title",
-        }
-    },
-    "secret2":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret3",
-            "Back":"goto:title",
-        }
-    },
-    "secret3":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret4",
-            "Back":"goto:title",
-            "":"goto:S"
-        }
-    },
-    "secret4":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret",
-            "Back":"goto:title",
-        }
-    },
-    "S":{
-        title:"You found it!",
-        options:{
-            "Back"(){
-                location="https://en.wikipedia.org/wiki/Easter_egg_(media)";
-            }
-        }
-    },
-    "load":{
-        title:"Load a Save",
-        options:{
-            "Save 1":"log: There is no data for Save 1.",
-            "Save 2":"log: There is no data for Save 2.",
-            "Save 3":"log: There is no data for Save 3.",
-            "Save 4":"log: There is no data for Save 4.",
-            "Back":"goto: title"
-        }
-    },
-    "config":{
-        title:"Start a New Game",
-        options:{
-            "%c{red}Name":"prompt",
-        }
-    }
-};
-for(let i in menus){
-    menus[i].keys=Object.keys(menus[i].options);
-    menus[i].prompts=new Array(menus[i].keys.length).fill("");
+function start(){
+    if(menu.prompts[0]){
+        state[Symbol.toPrimitive]=_=>"game";
+        map.addSimpleChunk(-9,-4,[
+            "###################",
+            "#.................#",
+            "#.................#",
+            "#.................#",
+            "#........ ........#",
+            "#.................#",
+            "#.................#",
+            "###################"
+        ]);
+        command("log: Let the game begin!\nUse Arrow Keys to move, and Space or Enter to select.")
+    } else command("log: Please enter a name.");
 }
-
-//Commands
-function command(s){
-    if(typeof s=="function"){
-        s();
-    } else {
-        s=s.split(/\:/);
-        command[s[0]](s.slice(1).join("").trim());
-    }
-}
-Object.assign(command,{
-    goto(s){
-        log.clear();
-        state.name=s;
-        state.changePos(-state.pos);
-    },
-    prompt(){
-        state.prompt=!state.prompt;
-    },
-    log:log
-});
-
-//The Log
-function log(a){
-    a=(a+"").split("\n").reverse();
-    a.unshift("");
-    for(var i=0;i<a.length;i++)
-        log.console.unshift(a[i]);
-}
-Object.assign(log,{
-    console:[],
-    clear(){
-        this.console=[];
-    },
-    draw(){
-        draw(0,height,"-".repeat(width-buf.x*2));
-        for(var i=0;i<log.console.length;i++)
-            draw(0,i+height+2,log.console[i]);
-    }
-});
-
 //60 fps
 function step(){
     //Init
     grid.clear();
-    menu=menus[state.name];
-    option=menu.keys[state.pos]+"";
-    cmd=menu.options[option];
     dir={
         x:(key=="ArrowRight")-(key=="ArrowLeft"),
         y:(key=="ArrowDown")-(key=="ArrowUp")
@@ -173,27 +74,51 @@ function step(){
 
     //The Code
     if(state=="menu"){
+        menu=menus[state.name];
+        option=menu.keys[state.pos]+"";
+        cmd=menu.options[option];
         if(dir.y){
             state.pos=Math.mod(state.pos+dir.y,menu.keys.length);
             state.prompt=false;
         }
         if(!state.prompt){
-            draw(0,state.pos+1,"%c{#88f}>");
+            sq(0,state.pos+1,">",player.color);
+        }
+        if(state.prompt){
+            if(key){
+                state.now=Date.now();
+                if(key.length==1){
+                    menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos)+key+menu.prompts[state.pos].slice(state.ppos++);
+                } else if(key=="Backspace"&&state.ppos){
+                    menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos-1)+menu.prompts[state.pos].slice(state.ppos--);
+                } else if(key=="ArrowLeft"&&state.ppos){
+                    state.ppos--;
+                } else if(key=="ArrowRight"&&state.ppos<menu.prompts[state.pos].length){
+                    state.ppos++;
+                }
+            }
         }
         for(let i=0;i<menu.prompts.length;i++){
             if(state.pos==i&&state.prompt){
-                draw((menu.keys[i]+"").length+2,i+1,": "+menu.prompts[i]);
+                let txt=": "+menu.prompts[i]+" ";
+                draw(String.Length(menu.keys[i])+2,i+1,txt);
+                if((Date.now()-state.now)%(2*blink)<blink)sq(4+String.Length(menu.keys[i])+state.ppos,i+1,txt[state.ppos+2],0,player.color);
             } else if(menu.prompts[i].length){
-                draw((menu.keys[i]+"").length+2,i+1,": "+menu.prompts[i]);
+                draw(String.Length(menu.keys[i])+2,i+1,": "+menu.prompts[i]);
             }
         }
         if((key==" "&&!state.prompt)||key=="Enter"){
             command(cmd);
         }
+
+        //drawing
         draw(0,0,menu.title);
         for(let i=0;i<menu.keys.length;i++){
             draw(2,i+1,menu.keys[i]);
         }
+    } else if(state=="game"){
+        map.act();
+        map.draw();
     }
 
     //End
@@ -201,169 +126,20 @@ function step(){
     key="";
 }
 window.onload=function(){
+    player=map.addBlock({
+        x:0,
+        y:0,
+        char:"@",
+        color:"#88f",
+        floor:".",
+        act(){
+            if(dir.x||dir.y){
+                this.move(dir.x,dir.y);
+            }
+        },
+        scout:0
+    });
+    command("log: Arrow Keys to Move, Space or Enter to Select");
     document.body.appendChild(grid.getContainer());
     setInterval(step,60);
 };
-/*
-state={
-    name:"title",
-    data:{
-        pos:0,
-        time:Date.now()
-    },
-    changePos(v){
-        this.data.pos+=v;
-        this.data.time=Date.now();
-    }
-};
-menus={
-    "title":{//jshint ignore:line
-        title:"The Aboveground Railroad",
-        options:{
-            "Start a New Game":"goto: config",
-            "Load a Game":"goto: load",
-            "About":"goto: about",
-            "Credits":"goto: credits",
-        }
-    },
-    "about":{
-        title:"About the Game",
-        options:{
-            "Inspiration":"log: This game was supposed to be based on the Oregon Trail, for US History.",
-            "Controls":"log: Well, you got this far.\nW goes up, X goes down, A goes left, D goes right, QEZC moves diagonally.\nS, Space, and Enter are select. R to refresh the page.",
-            "Back":"goto: title"
-        }
-    },
-    "credits":{
-        title:"Credits",
-        options:{
-            "Marcus Luebke":"log: Marcus Luebke is still writing the game. How'd you get beta access?",
-            "Back":"goto: title",
-            "":"goto: secret"
-        }
-    },
-    "secret":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret2",
-            "Back":"goto:title",
-        }
-    },
-    "secret2":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret3",
-            "Back":"goto:title",
-        }
-    },
-    "secret3":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret4",
-            "Back":"goto:title",
-            "":"goto:S"
-        }
-    },
-    "secret4":{
-        title:"?",
-        options:{
-            "Option 1":"goto: secret",
-            "Back":"goto:title",
-        }
-    },
-    "S":{
-        title:"You found it!",
-        options:{
-            "Back"(){
-                location="https://en.wikipedia.org/wiki/Easter_egg_(media)";
-            }
-        }
-    },
-    "load":{
-        title:"Load a Save",
-        options:{
-            "Save 1":"log: There is no data for Save 1.",
-            "Save 2":"log: There is no data for Save 2.",
-            "Save 3":"log: There is no data for Save 3.",
-            "Save 4":"log: There is no data for Save 4.",
-            "Back":"goto: title"
-        }
-    },
-    "config":{
-        title:"Start a New Game",
-        options:{
-            "Name":"prompt",
-        }
-    }
-};
-function command(s){
-    if(typeof s=="function"){
-        s();
-    } else {
-        s=s.split(/\:/);
-        command[s[0]](s.slice(1).join("").trim());
-    }
-}
-Object.assign(command,{
-    goto(s){
-        log.console=[];
-        state.name=s;
-        state.changePos(-state.data.pos);
-    },
-    log:log
-});
-function log(a,c){
-    a=a.split("\n").reverse();
-    a.unshift("");
-    for(var i in a)
-        log.console.unshift({
-            c:c||"#fff",
-            s:a[i]||""
-        });
-}
-log.console=[];
-
-map=[];
-function draw(){
-    for(var i=0;i<map.length&&i<map.height;i++){
-
-    }
-}
-function step(){
-    menu=menus[state.name];
-    menopos=Object.keys(menu.options);
-    option=menopos[state.data.pos];
-
-    if(pad.getNewInput("Up")){
-        state.changePos(-1);
-    }
-    if(pad.getNewInput("Down")){
-        state.changePos(1);
-    }
-    if(pad.getNewInput("Go")){
-        command(menu.options[option]);
-    }
-    if(pad.getNewInput("restart")&&confirm("Are you sure you want to leave the page?")){
-        history.go();
-    }
-    state.data.pos=Math.mod(state.data.pos,menopos.length);
-
-
-    map=new Array(50).fill("");
-    col=new Array(map.length).fill("#fff");
-    map[0]=menu.title;
-    var I=0;
-    for(var i in menu.options){
-        I++;
-        map[I]="  "+i;
-    }
-    map[state.data.pos+1]=">"+map[state.data.pos+1].slice(1);
-
-    map[10]=" ".repeat(18)+"***";
-    for(var i in log.console){
-        col[+i+11]=log.console[i].c;
-        map[+i+11]=log.console[i].s;
-    }
-    pad.endStep();
-}
-*/
