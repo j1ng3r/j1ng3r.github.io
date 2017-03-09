@@ -8,7 +8,7 @@
 
 function LopBowl(x,y){
     var z=x*x+y*y;
-    return(4+Math.tanh(x))*Math.exp(Math.sqrt(z)-z)*Math.sqrt(1-z)*z*Math.sin(x*y);
+    return((4+Math.tanh(x))*Math.exp(Math.sqrt(z)-z)*Math.sqrt(1-z)*z*Math.sin(x*y))||Infinity;
 }
 function Bowl(x,y){
     var z=Math.sqrt(x*x+y*y);
@@ -22,11 +22,9 @@ var a=[[1,2],[3,4]];
 new AI()
 	.defineGeneCount(50)
     .defineIterations(200)
-    .defineArguments("x","y","z")
+    .defineArguments("x","y")
     .defineReproduction("linear",10)
-    .defineCostFunction(function(x,y,z){
-		return x+y+z;
-	})
+    .defineCostFunction(LopBowl)
 	.defineCompletionFunction("return",console.log)
 	.defineGeneProperties({
 		mutProb:0.5,
@@ -34,20 +32,15 @@ new AI()
 		makeNewProb:0,
 	},{
 		"x":{
-			array:function(){var a=[];for(var i=0;i<10;i++)a.push(Math.random()*10);console.log(a);return a;}()
+			maxVal:1,
+            minVal:-1,
+            maxMut:0.02,
         },
 		"y":{
-			returnFunc:_=>_*_,
-			maxValSoft:5,
-            minValSoft:-3,
-            maxMut:0.5,
+			maxVal:1,
+            minVal:-1,
+            maxMut:0.02,
         },
-        "z":{
-            returnFunc:_=>_*_,
-			maxValSoft:5,
-            minValSoft:-3,
-            maxMut:0.5,
-        }
 	})
     .execute()
 ;

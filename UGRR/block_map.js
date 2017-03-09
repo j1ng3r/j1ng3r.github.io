@@ -24,6 +24,7 @@ function Block(o){
     O("collide");
     O("act");
     O("kill");
+    O("interact");
 }
 function bind(f,t){
     if(typeof f=="function")return f.bind(t);
@@ -37,7 +38,7 @@ Object.assign(Block.prototype,{
     },
     draw(){
         if(!this.ceil){
-            let d={x:this.x-player.x+(width+1)/2,y:this.y-player.y+(height+1)/2};
+            let d={x:this.x-player.x+(width-box+1)/2,y:this.y-player.y+(height+1)/2};
             if(d.x>=0&&width>d.x&&d.y>=0&&height>d.y){
                 sq(d.x,d.y,this.char,this.color,this.background);
             }
@@ -60,15 +61,16 @@ Object.assign(Block.prototype,{
     },
     move(x,y){
         let char=map.getChar(this.x+x,this.y+y);
+        let p={x:this.x,y:this.y};
         if(char.scout(this)){
-            if(typeof this.floor=="string"){
-                map.setSimpleChar(this.x,this.y,this.floor);
-            } else {
-                this.removeFloor(this.floor);
-            }
             char.collide(this);
             this.x+=x;
             this.y+=y;
+            if(typeof this.floor=="string"){
+                map.setSimpleChar(p.x,p.y,this.floor);
+            } else {
+                this.removeFloor(this.floor);
+            }
             this.setFloor(char);
         }
     }

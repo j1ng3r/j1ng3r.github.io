@@ -5,8 +5,9 @@ var audio=Object.assign(new Audio,{
     autoplay:true,
     onended(){this.play();}
 });
-width=69;
-height=29;
+box=40;
+width=149;
+height=35;
 blink=800;
 buf={x:2,y:1};
 grid = new ROT.Display({
@@ -16,25 +17,24 @@ grid = new ROT.Display({
     fontFamily:"monospace",
     bg:"#000"
 });
-function draw(a,b,c){
-    if(Array.isArray(c)){
-        for(let i=0;i<c.length;i++){
-            sq(+a+i,b,c[i]);
-        }
-        return;
-    } else return draw(a,b,c.split(""));
-}
-function sq(x,y,s,c,b){
-    return grid.draw(+x+buf.x,+y+buf.y,s,c,b);
-}
-key="";
+key=[];
 window.onkeydown=function(e){
-    key=e.key;
-    console.log("Key press:",key);
+    key.push(e.key);
+    console.log("Key press:",e.key);
 };
 font.onload=function(){
-    grid.setOptions({fontFamily:"Ubuntu Mono"});
+    //grid.setOptions({fontFamily:"Ubuntu Mono"});
 };
+function Prompt(prompt,answers){
+    console.trace();
+    state.prompt={
+        prompt:prompt,
+        answers:answers,
+        keys:Object.keys(answers),
+        pos:0
+    };
+    console.log(answers);
+}
 //State controls
 state={
     name:"title",
@@ -47,29 +47,44 @@ state={
     prompt:false
 };
 state[Symbol.toPrimitive]=_=>"menu";
-function start(){
-    if(menu.prompts[0]){
-        state[Symbol.toPrimitive]=_=>"game";
-        map.addSimpleChunk(-9,-4,[
-            "###################",
-            "#.................#",
-            "#.................#",
-            "#.................#",
-            "#........ ........#",
-            "#.................#",
-            "#.................#",
-            "###################"
-        ]);
-        command("log: Let the game begin!\nUse Arrow Keys to move, and Space or Enter to select.")
-    } else command("log: Please enter a name.");
-}
+Box={
+    lines:[],
+    draw(){
+        let bc=player.color;
+        let bb=[].a;
+        sq(width-box+1,1,"+",bc,bb);
+        sq(width-2,1,"+",bc,bb);
+        sq(width-box+1,height-2,"+",bc,bb);
+        sq(width-2,height-2,"+",bc,bb);
+        for(let y=2;y<height-2;y++){
+            sq(width-box+1,y,"|",bc,bb);
+            sq(width-2,y,"|",bc,bb);
+        }
+        for(let x=2;x<box-2;x++){
+            sq(width-box+x,1,"-",bc,bb);
+            sq(width-box+x,height-2,"-",bc,bb);
+        }
+        for(let i=0;i<this.lines.length;i++){
+            text(width-box+2,i+2,this.lines[i]);
+        }
+    }
+};
 //60 fps
+function getColor(p,min,max){
+    return ROT.Color.toHex(ROT.Color.interpolate(ROT.Color.fromString(min),ROT.Color.fromString(max),p));
+}
+function getBar(n,min,max){
+    let p=player[n.toLowerCase()]/player[n.toUpperCase()],c=getColor(p,min,max);
+    return n+`:%b{${c}}%c{${c}}`+".".repeat(Math.round((box-5-n.length)*p));
+}
 function step(){
     //Init
     grid.clear();
     dir={
-        x:(key=="ArrowRight")-(key=="ArrowLeft"),
-        y:(key=="ArrowDown")-(key=="ArrowUp")
+        x:key.includes("ArrowRight")-key.includes("ArrowLeft"),
+        y:key.includes("ArrowDown")-key.includes("ArrowUp"),
+        z:key.includes("c")-key.includes("z"),
+        s:key.includes(" ")||key.includes("x")||key.includes("Enter")
     };
 
     //The Code
@@ -85,16 +100,19 @@ function step(){
             sq(0,state.pos+1,">",player.color);
         }
         if(state.prompt){
-            if(key){
+            if(key.length){
                 state.now=Date.now();
-                if(key.length==1){
-                    menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos)+key+menu.prompts[state.pos].slice(state.ppos++);
-                } else if(key=="Backspace"&&state.ppos){
-                    menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos-1)+menu.prompts[state.pos].slice(state.ppos--);
-                } else if(key=="ArrowLeft"&&state.ppos){
-                    state.ppos--;
-                } else if(key=="ArrowRight"&&state.ppos<menu.prompts[state.pos].length){
-                    state.ppos++;
+                for(let i=0;i<key.length;i++){
+                    let k=key[i];
+                    if(k.length==1){
+                        menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos)+k+menu.prompts[state.pos].slice(state.ppos++);
+                    } else if(k=="Backspace"&&state.ppos){
+                        menu.prompts[state.pos]=menu.prompts[state.pos].slice(0,state.ppos-1)+menu.prompts[state.pos].slice(state.ppos--);
+                    } else if(k=="ArrowLeft"&&state.ppos){
+                        state.ppos--;
+                    } else if(k=="ArrowRight"&&state.ppos<menu.prompts[state.pos].length){
+                        state.ppos++;
+                    }
                 }
             }
         }
@@ -107,7 +125,7 @@ function step(){
                 draw(String.Length(menu.keys[i])+2,i+1,": "+menu.prompts[i]);
             }
         }
-        if((key==" "&&!state.prompt)||key=="Enter"){
+        if((dir.s&&!state.prompt)||key.includes("Enter")){
             command(cmd);
         }
 
@@ -117,13 +135,73 @@ function step(){
             draw(2,i+1,menu.keys[i]);
         }
     } else if(state=="game"){
+        Box.lines=[
+            ("Name: "+player.name).split("").slice(0,box-4),
+            getBar("Health","#ff0000","#00ff00"),
+            getBar("Energy","#000000","#ffff00"),
+            getBar("Hunger","#00ff00","#ff0000")
+        ];
         map.act();
         map.draw();
+        Box.draw();
     }
 
     //End
     log.draw();
-    key="";
+    key=[];
+}
+function start(){
+    if(menu.prompts[0]){
+        player.name=menu.prompts[0];
+        state[Symbol.toPrimitive]=_=>"game";
+        state.prompt=null;
+        map.addSimpleChunk(-9,-4,[
+            "######### #########",
+            "#.................#",
+            "#.................#",
+            "#.................#",
+            "#........ ........#",
+            "#.................#",
+            "#.................#",
+            "###################"
+        ]);
+        map.AddChar({
+            x:0,
+            y:-4,
+            char:"@",
+            color:"#d07010",
+            scout(){
+                if(!state.prompt){
+                    command('log: Press Space, Enter, or X (the "Select" Keys) to interact.');
+                }
+            },
+            interact(player){
+                if(!state.prompt){
+                    let cont=_=>Prompt("Great! The year is 18XX. You are a\nslave in the Deep South, and you\nlive in horrible conditions.\n\nDaily whippings and brutal torture\nare common. Combined with grueling\nwork for no pay, this isn't a great\nsituation to be in.",{
+                        "Leave to go North"(){
+                            log("Good decision!\nThat's all I've got for now...");
+                            map.kill(0,-4);
+                            map.addSimpleChar(0,-4,"#");
+                        },
+                        "Stay in the South"(){
+                            log("%c{red}You choose to stay in the South. Your family is sold away when you are 33.\n%c{red}In the next four years of your life, you never feel another happy moment. Then,\n%c{red}at 37, you die under the whip after asking to be treated in a more humane manner.")
+                            map.kill(0,-4);
+                            map.addSimpleChar(0,-4,"#");
+                        }
+                    });
+                    Prompt("This is an example prompt.\nSelect to choose an option.",{
+                        "OK"(){Prompt("Use the arrow keys and\nthe Z and C keys to move.",{
+                            "That sounds great":cont,
+                            "That sounds awful"(){Prompt("Are you sure?",{
+                                "Never mind, that sounds great":cont
+                            });}
+                        });}
+                    });
+                }
+            }
+        });
+        command("log: Let the game begin!\nUse Arrow Keys to move, and Space, Enter, or X to select.");
+    } else command("log: Please enter a name.");
 }
 window.onload=function(){
     player=map.addBlock({
@@ -133,13 +211,39 @@ window.onload=function(){
         color:"#88f",
         floor:".",
         act(){
+            if(state.prompt){
+                if(dir.y+dir.z){
+                    state.prompt.pos=Math.mod(state.prompt.pos+dir.y+dir.z,state.prompt.keys.length);
+                }
+                Box.lines.push("");
+                [].push.apply(Box.lines,state.prompt.prompt.split("\n"));
+                for(let i in state.prompt.answers){
+                    Box.lines.push([state.prompt.keys.indexOf(i)==state.prompt.pos?`>${player.color}#000`:" "," "].concat(i.split("")));
+                }
+                if(dir.s){
+                    state.prompt.answers[state.prompt.keys[state.prompt.pos]](state.prompt=null);
+                }
+            }
             if(dir.x||dir.y){
                 this.move(dir.x,dir.y);
+            }
+            if(key.includes(" ")||key.includes("Enter")){
+                for(let x=-1;x<2;x++){
+                    for(let y=-1;y<2;y++){
+                        map.getChar(this.x+x,this.y+y).interact(this);
+                    }
+                }
             }
         },
         scout:0
     });
+    player.HEALTH=20;
+    player.ENERGY=20;
+    player.HUNGER=20;
+    player.health=player.HEALTH;
+    player.energy=player.ENERGY;
+    player.hunger=0;
     command("log: Arrow Keys to Move, Space or Enter to Select");
     document.body.appendChild(grid.getContainer());
-    setInterval(step,60);
+    setInterval(step,19);
 };
