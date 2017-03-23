@@ -43,6 +43,9 @@ function log(a){
     for(var i=0;i<a.length;i++)
         log.console.unshift(a[i]);
 }
+function dialog(a,n){
+    log(`%c{}${a}\n  - %c{#afa}${n}`)
+}
 Object.assign(log,{
     console:[],
     clear(){

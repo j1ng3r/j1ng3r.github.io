@@ -1,6 +1,6 @@
 //The grid and gamepad
 String.Length=s=>(s+"").replace(/%[a-z]\{[^}]*}/gi,"").length;
-var audio=Object.assign(new Audio,{
+var audio=Object.assign(new Audio(),{
     src:"UGRR/full_song.ogg",
     autoplay:true,
     onended(){this.play();}
@@ -26,14 +26,12 @@ font.onload=function(){
     //grid.setOptions({fontFamily:"Ubuntu Mono"});
 };
 function Prompt(prompt,answers){
-    console.trace();
     state.prompt={
         prompt:prompt,
         answers:answers,
         keys:Object.keys(answers),
         pos:0
     };
-    console.log(answers);
 }
 //State controls
 state={
@@ -165,44 +163,124 @@ function start(){
             "#.................#",
             "###################"
         ]);
-        map.AddChar({
+        map.AddPerson({
             x:0,
             y:-4,
-            char:"@",
             color:"#d07010",
             scout(){
                 if(!state.prompt){
                     command('log: Press Space, Enter, or X (the "Select" Keys) to interact.');
                 }
             },
+            name:"The Tutorial Guy",
             interact(player){
-                if(!state.prompt){
-                    let cont=_=>Prompt("Great! The year is 18XX. You are a\nslave in the Deep South, and you\nlive in horrible conditions.\n\nDaily whippings and brutal torture\nare common. Combined with grueling\nwork for no pay, this isn't a great\nsituation to be in.",{
-                        "Leave to go North"(){
-                            log("Good decision!\nThat's all I've got for now...");
+                let T=this;
+                let cont=_=>Prompt("Great! The year is 18XX. You are a\nslave in the Deep South, and you\nlive in horrible conditions.\n\nDaily whippings and brutal torture\nare common. Combined with grueling\nwork for no pay, this isn't a great\nsituation to be in.",{
+                    "Leave to go North"(){Prompt("Good choice! Now, I've heard that\nthere's a %c{green}conductor%c{} from the Under-\nground Railroad coming at noon. It's\n6:00AM now, and as soon as you end\nthis conversation time will resume\nas normal.",{
+                        "Sounds Good"(){
+                            T.dialog("Best of luck!");
                             map.kill(0,-4);
-                            map.addSimpleChar(0,-4,"#");
-                        },
-                        "Stay in the South"(){
-                            log("%c{red}You choose to stay in the South. Your family is sold away when you are 33.\n%c{red}In the next four years of your life, you never feel another happy moment. Then,\n%c{red}at 37, you die under the whip after asking to be treated in a more humane manner.")
-                            map.kill(0,-4);
-                            map.addSimpleChar(0,-4,"#");
+                            player.time=true;
+                            map.addSimpleChunk(-29,-13,[
+                                "+------------------------+=======+------------------------+.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|......... ...............................................|.............................................",
+                                "|.................................. ......................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|...................         .         ...................|.............................................",
+                                "|...................                   ......... .........|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.... ....................................................|.............................................",
+                                "|......................................... ...............|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "|........... .............................................|.............................................",
+                                "|.........................................................|.............................................",
+                                "+---------------------------------------------------------+............................................."
+                            ]);
+                            map.AddPerson({
+                                x:13,
+                                y:6,
+                                floor:".",
+                                interact(){
+                                    log("He doesn't want to talk.");
+                                },
+                                color:"#840"
+                            });
+                            map.AddPerson({
+                                x:-19,
+                                y:-9,
+                                name:"John",
+                                color:"#c72"
+                            });
+                            map.AddPerson({
+                                x:6,
+                                y:-8,
+                                name:"Alex",
+                                color:"#630"
+                            });
+                            map.AddPerson({
+                                x:-17,
+                                y:11,
+                                name:"Mortimer Apos-Trophy",
+                                color:"#fff",
+                                interact(player){
+                                    this.hasTalked=true;
+                                    this.dialog("Wha'ter yuo doin walk'n aroun, n'hoht  workin!? Irl beet ye cilee! Yoo blubbberign' idiot! Git ba'k ta dwerk!");
+                                }
+                            });
+                            map.AddPerson({
+                                x:6,
+                                y:-8,
+                                name:"Alex",
+                                color:"#630"
+                            });
                         }
-                    });
-                    Prompt("This is an example prompt.\nSelect to choose an option.",{
-                        "OK"(){Prompt("Use the arrow keys and\nthe Z and C keys to move.",{
-                            "That sounds great":cont,
-                            "That sounds awful"(){Prompt("Are you sure?",{
-                                "Never mind, that sounds great":cont
-                            });}
+                    });},
+                    "Stay in the South"(){
+                        log("%c{red}You choose to stay in the South. Your family is sold away when you are 33.\n%c{red}In the next four years of your life, you never feel another happy moment. Then,\n%c{red}at 37, you die under the whip after asking to be treated in a more humane manner.");
+                        map.kill(0,-4);
+                        map.addSimpleChar(0,-4,"#");
+                    }
+                });
+                Prompt("This is an example prompt.\nSelect to choose an option.",{
+                    "OK"(){Prompt("Use the arrow keys and\nthe Z and C keys to move.",{
+                        "That sounds great":cont,
+                        "That sounds awful"(){Prompt("Are you sure?",{
+                            "Never mind, that sounds great":cont
                         });}
-                    });
-                }
+                    });}
+                });
             }
         });
         command("log: Let the game begin!\nUse Arrow Keys to move, and Space, Enter, or X to select.");
     } else command("log: Please enter a name.");
 }
+paused=false;
+time=360*30;
+function stepTime(){
+    setTime(time+1);
+}
+function setTime(a){
+    time=a;
+    seconds=((time*2)%60+"").lpad("0",2);
+    minutes=(Math.floor(time/30)%60+"").lpad("0",2);
+    hours=(Math.floor(time/30/60)%24+"").lpad("0",2);
+    day=1+Math.floor(time/30/60/24);
+}
+setTime(time);
 window.onload=function(){
     player=map.addBlock({
         x:0,
@@ -234,6 +312,9 @@ window.onload=function(){
                     }
                 }
             }
+            if(this.time)stepTime();
+            Time=`Day ${day}, ${hours}:${minutes}:${seconds}`;
+            Box.lines.unshift(Time);
         },
         scout:0
     });
@@ -243,7 +324,7 @@ window.onload=function(){
     player.health=player.HEALTH;
     player.energy=player.ENERGY;
     player.hunger=0;
-    command("log: Arrow Keys to Move, Space or Enter to Select");
+    command("log: Arrow Keys to Move, Space, X or Enter to Select\nFullscreen is recommended.");
     document.body.appendChild(grid.getContainer());
     setInterval(step,19);
 };

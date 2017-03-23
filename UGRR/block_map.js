@@ -8,6 +8,7 @@ function Block(o){
     this.x=+o.x;
     this.y=+o.y;
     if(this.x!=this.x||this.y!=this.y){throw new TypeError("x or y is NaN");}
+    this.name=o.name||"Anonymous";
     this.floor=o.floor&&o.floor.length==1?o.floor:" ";
     this.ceil=o.ceil&&o.ceil.length==1?o.ceil:"";
     this.char=o.char&&o.char.length==1?o.char:" ";
@@ -39,7 +40,7 @@ Object.assign(Block.prototype,{
     draw(){
         if(!this.ceil){
             let d={x:this.x-player.x+(width-box+1)/2,y:this.y-player.y+(height+1)/2};
-            if(d.x>=0&&width>d.x&&d.y>=0&&height>d.y){
+            if(d.x>=0&&width-box+1>d.x&&d.y>=0&&height>d.y){
                 sq(d.x,d.y,this.char,this.color,this.background);
             }
         }
@@ -73,14 +74,23 @@ Object.assign(Block.prototype,{
             }
             this.setFloor(char);
         }
+    },
+    dialog(a){
+        dialog(a,this.name);
+    },
+    test(c){
+        this.background=c||"#f00";
     }
 });
 map=Object.assign([],{
     style:{
         ".":{
-            color:["#4c4"],
+            color:["#6a2","#4c4","#d62","#b83"],
             scout:1
         },
+    },
+    test(x,y,c){
+        this.getChar(x,y).test(c);
     },
     getStyle(c,k){
         if(k===undefined){
@@ -95,14 +105,13 @@ map=Object.assign([],{
             if(Array.isArray(r))return r.random();
             return r;
         } else return;
-
     },
     addSimpleChunk(x,y,a){
         return this.AddSimpleChunk({
             x:x,
             y:y,
             array:a
-        })
+        });
     },
     AddSimpleChunk(o){
         for(let Y=0;Y<o.array.length;Y++){
@@ -178,6 +187,22 @@ map=Object.assign([],{
         this.push(b);
         return b;
     },
+    addPerson(x,y,o){
+        return this.AddPerson(Object.assign({},o,{x:x,y:y}));
+    },
+    AddPerson(o){
+        let _=o.interact||function(){this.dialog("Hi!");};
+        let x=this.AddChar(Object.assign({
+            char:"@"
+        },o,{interact(p){if(!state.prompt)_.apply(this,[p]);}}));
+    },
+    getPerson(name){
+        for(let i=1;i<this.length;i++){
+            if(this[i].name==name){
+                return this[i];
+            }
+        }
+    },
     getChar(x,y){
         return this.GetChar({x:x,y:y});
     },
@@ -187,7 +212,7 @@ map=Object.assign([],{
                 return this[i];
             }
         }
-        console.info(`Fudging at ${o.x}, ${o.y}`)
+        console.info(`Fudging at ${o.x}, ${o.y}`);
         return this.addBlock({
             x:o.x,
             y:o.y,
@@ -198,6 +223,6 @@ map=Object.assign([],{
         for(let i=0;i<this.length;i++)this[i].draw();
     },
     act(){
-        for(let i=0;i<this.length;i++)this[i].act();
+        if(!paused)for(let i=0;i<this.length;i++)this[i].act();
     }
 });
