@@ -1,0 +1,180 @@
+<!DocType Html>
+<html>
+    <head>
+        <script src="js/expand.js"></script>
+        <script>
+            pile=[];
+            dirs=[
+                [0,-1],//U
+                [0,1],//D
+                [-1,0],//L
+                [1,0]//R
+                //[1,1],//DR
+                //[-1,1],//DL
+                //[-1,-1],//UL
+                //[1,-1]//UR
+            ];
+            cont=false;
+            loy=lox=Infinity;
+            hix=hiy=-Infinity;
+            function createEmptyPile(x,y){
+                pile=[];
+                loy=lox=Infinity;
+                hix=hiy=-Infinity;
+                for(let j=0;j<y;j++)
+                    pile.push(new Uint32Array(x));
+            }
+            function clearPile(){createEmptyPile(pile[0].length,pile.length);}
+            function addToPile(x,y,a){
+                if(typeof a=="number"){
+                    if(y<0||y>=pile.length||x<0||x>=pile[y].length)return;
+                    loy=Math.min(loy,y);
+                    lox=Math.min(lox,x);
+                    hiy=Math.max(hiy,y);
+                    hix=Math.max(hix,x);
+                    pile[y][x]+=a;
+                    if(pile[y][x]>=dirs.length){
+                        uncollapsed.push([x,y]);
+                    }
+                } else if(Array.isArray(a)){
+                    for(let j=0;j<a.length;j++){
+                        for(let i=0;i<a[j].length;i++)
+                            addToPile(x+i,y+j,a[j][i]);
+                    }
+                } else {
+                    throw new TypeError("Expected Array or Number.");
+                }
+            }
+            function eq(p,q){
+                for(let j=0;j<p.length;j++){
+                    for(let i=0;i<p[j].length;i++){
+                        if(p[j][i]!=q[j][i])return false;
+                    }
+                }
+                return true;
+            }
+            uncollapsed=[];
+            time=[0,0];
+            function collapse(_){
+                var npile={};
+                let t=performance.now();
+                for(let l=0,i,j,k,x,y;l<uncollapsed.length;l++){
+                    i=uncollapsed[l][0];
+                    j=uncollapsed[l][1];
+                    npile[i+","+j]=(npile[i+","+j]||0)-dl;
+                    for(k=0;k<dl;k++){
+                        let x=i+dirs[k][0],y=j+dirs[k][1];
+                        npile[x+','+y]=(npile[x+','+y]||0)+1;
+                        /*
+                        if(y>=0&&y<pile.length||x>=0||x<pile[y].length){
+                            npile[x+','+y]=(npile[x+','+y]||0)+1;
+                        } else if(cont){
+                            npile[Math.mod(y,pile.length),Math.mod(x,pile[j].length)]=(npile[Math.mod(y,pile.length),Math.mod(x,pile[j].length)]||0)+1;
+                        }
+                        */
+                    }
+                }
+                if(_){time[0]+=performance.now()-t;t=performance.now();}
+                uncollapsed=[];
+                for(let i in npile){
+                    let x=+i.match(/^-?\d+/)[0],y=+i.match(/-?\d+$/)[0];
+                    addToPile(x,y,npile[i]);
+                }
+                if(_)time[1]+=performance.now()-t;
+                //10000x=[9022.325000000019,12831.850000000035]
+                /*var add=[];
+                var sub=[];
+                let t=performance.now();
+                for(let l=0,i,j,k,x,y;l<uncollapsed.length;l++){
+                    i=uncollapsed[l][0];
+                    j=uncollapsed[l][1];
+                    sub.push([i,j]);
+                    for(let k=0;k<dirs.length;k++){
+                        let x=i+dirs[k][0],y=j+dirs[k][1];
+                        if(y>=0&&y<pile.length||x>=0||x<pile[y].length){
+                            add.push([x,y]);
+                        } else if(cont){
+                            add.push([Math.mod(y,npile.length),Math.mod(x,npile[j].length)]);
+                        }
+                    }
+                }
+                if(_){time[0]+=performance.now()-t;t=performance.now();}
+                uncollapsed=[];
+                for(let i=0;i<add.length;i++){
+                    addToPile(add[i][0],add[i][1],1);
+                }
+                for(let i=0;i<sub.length;i++){
+                    addToPile(sub[i][0],sub[i][1],-dirs.length);
+                }
+                if(_)time[1]+=performance.now()-t;*/
+            }
+            function fullcollapse(){
+                while(!eq(pile,collapse(pile)));
+                return pile;
+            }
+            function setDirs(a,c,x,y){
+                dirs=[];
+                for(let j=0;j<a.length;j++)
+                    for(let i=0;i<a[j].length;i++)
+                        if(a[j][i]===c)
+                            dirs.push([x+i,y+j]);
+                dl=dirs.length;
+            }
+            function parse(p){
+                for(var j=0,a=new Array(p.length).fill(""),s=" .=#",i;j<p.length;j++){
+                    for(i=0;i<p[j].length;i++){
+                        a[j]+=s[p[j][i]];
+                    }
+                }
+                return`\n${a.join("\n")}\n`;
+            }
+            function test(x,y,v){
+                createEmptyPile(x,y);
+                addToPile(Math.floor(x/2),Math.floor(y/2),v);
+                fullcollapse();
+                draw();
+            }
+            function step(){
+                if(pile.length&&on)collapse();
+            }
+            function draw(){
+                if(!paused){
+                    ctx.fillStyle="#fff";
+                    ctx.fillRect(0,0,c.width,c.height);
+                    for(let j=loy;j<=hiy;j++){
+                        for(let i=lox;i<=hix;i++){
+                            if(pile[j][i]>0){
+                                ctx.fillStyle=pile[j][i]<dirs.length?["#fff","#c0c0ff","#8080ff","#4040ff","#f00","#0f0","#0ff","#ff0","#bbb","#444"][pile[j][i]]:"#00f";
+                                ctx.fillRect(i*c.width/pile[j].length,j*c.height/pile.length,c.width/pile[j].length,c.height/pile.length);
+                            }
+                            //let col=Math.max(Math.min(Math.round(255-(255/dirs.length)*pile[j][i]),255),0);
+                            //ctx.fillStyle=`rgb(${col},${col},255)`;
+                        }
+                    }
+                }
+            }
+            paused=false;
+            on=false;
+            window.onload=function(){
+                ctx=c.getContext("2d");
+                c.width=2001;
+                c.height=1001;
+                setDirs([
+                    "     ",
+                    "  .  ",
+                    " . . ",
+                    "  .  ",
+                    "     "
+                ],".",-2,-2);
+                createEmptyPile(c.width,c.height);
+                for(let T=0,r=100;T==0;T+=0.01){
+                    addToPile(Math.round(1000+r*Math.cos(T)),Math.round(500+r*Math.sin(T)),-1);
+                }
+                interval(step,draw,1000);
+            };
+        </script>
+    </head>
+    <body>
+        <canvas id="c"></canvas><button onclick="(_=>{paused=!paused;this.innerHTML=this.innerHTML=='Hide'?'Show':'Hide'})()">Hide</button><button onclick="(_=>{on=!on;this.innerHTML=this.innerHTML=='Play'?'Pause':'Play'})()">Play</button>
+    </body>
+</html>

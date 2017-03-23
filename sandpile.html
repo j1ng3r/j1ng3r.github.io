@@ -1,0 +1,143 @@
+<!DocType Html>
+<html>
+    <head>
+        <script src="js/expand.js"></script>
+        <script>
+            pile=[];
+            function createEmptyPile(x,y,r){
+                pile=[];
+                if(!r){
+                    loy=lox=Infinity;
+                    hix=hiy=-Infinity;
+                }
+                for(let j=0;j<y;j++)
+                    pile.push(new Uint32Array(x));
+            }
+            function clearPile(){createEmptyPile(pile[0].length,pile.length);}
+            function addToPile(x,y,a){
+                if(typeof a=="number"){
+                    if(y<0||y>=pile.length||x<0||x>=pile[y].length)return;
+                    loy=Math.min(loy,y);
+                    lox=Math.min(lox,x);
+                    hiy=Math.max(hiy,y);
+                    hix=Math.max(hix,x);
+                    pile[y][x]+=a;
+                } else if(Array.isArray(a)){
+                    for(let j=0;j<a.length;j++){
+                        for(let i=0;i<a[j].length;i++)
+                            addToPile(x+i,y+j,a[j][i]);
+                    }
+                } else {
+                    throw new TypeError("Expected Array or Number.");
+                }
+            }
+            function eq(p,q){
+                for(let j=0;j<p.length;j++){
+                    for(let i=0;i<p[j].length;i++){
+                        if(p[j][i]!=q[j][i])return false;
+                    }
+                }
+                return true;
+            }
+            loy=lox=Infinity;
+            hix=hiy=-Infinity;
+            function collapse(){
+                /*var npile=pile;
+                clearPile();
+                addToPile(0,0,npile);
+                for(let j=loy;j<=hiy;j++){
+                    for(let i=lox;i<=hix;i++){
+                        if(npile[j][i]>=dirs.length){
+                            pile[j][i]-=dirs.length;
+                            for(let k=0;k<dirs.length;k++){
+                                let x=i+dirs[k][0],y=j+dirs[k][1];
+                                addToPile(x,y,1);
+                                if(cont)addToPile(Math.mod(y,npile.length),Math.mod(x,npile[j].length),1);
+                            }
+                        }
+                    }
+                }*/
+                //100x = 4298.127ms
+                var npile={};
+                for(let j=loy;j<=hiy;j++){
+                    for(let i=lox;i<=hix;i++){
+                        if(pile[j][i]>=dirs.length){
+                            npile[i+","+j]=(npile[i+","+j]||0)-dirs.length;
+                            for(let k=0;k<dirs.length;k++){
+                                let x=i+dirs[k][0],y=j+dirs[k][1];
+                                if(y>=0&&y<pile.length||x>=0||x<pile[y].length){
+                                    npile[x+','+y]=(npile[x+','+y]||0)+1;
+                                } else if(cont){
+                                    npile[Math.mod(y,npile.length),Math.mod(x,npile[j].length)]=(npile[Math.mod(y,npile.length),Math.mod(x,npile[j].length)]||0)+1;
+                                }
+                            }
+                        }
+                    }
+                }
+                for(let i in npile){
+                    addToPile(+i.match(/^\d+/)[0],+i.match(/\d+$/)[0],npile[i]);
+                }
+                //100x = 11.274ms
+            }
+            function fullcollapse(){
+                while(!eq(pile,collapse(pile)));
+                return pile;
+            }
+            function setDirs(a,c,x,y){
+                dirs=[];
+                for(let j=0;j<a.length;j++)
+                    for(let i=0;i<a[j].length;i++)
+                        if(a[j][i]===c)
+                            dirs.push([x+i,y+j]);
+            }
+            function parse(p){
+                for(var j=0,a=new Array(p.length).fill(""),s=" .=#",i;j<p.length;j++){
+                    for(i=0;i<p[j].length;i++){
+                        a[j]+=s[p[j][i]];
+                    }
+                }
+                return`\n${a.join("\n")}\n`;
+            }
+            function test(x,y,v){
+                createEmptyPile(x,y);
+                addToPile(Math.floor(x/2),Math.floor(y/2),v);
+                fullcollapse();
+                draw();
+            }
+            function step(){
+                if(pile.length)collapse();
+            }
+            function draw(){
+                if(!paused){
+                    ctx.fillStyle="#fff";
+                    ctx.fillRect(0,0,c.width,c.height);
+                    for(let j=loy;j<=hiy;j++){
+                        for(let i=lox;i<=hix;i++){
+                            //let col=Math.max(Math.min(Math.round(255-(255/dirs.length)*pile[j][i]),255),0);
+                            //ctx.fillStyle=`rgb(${col},${col},255)`;
+                            ctx.fillStyle=pile[j][i]<5?["#fff","#f00","#00f","#f0f","#000"][pile[j][i]]:"#0f0";
+                            ctx.fillRect(i*c.width/pile[j].length,j*c.height/pile.length,c.width/pile[j].length,c.height/pile.length);
+                        }
+                    }
+                }
+            }
+            paused=false;
+            window.onload=function(){
+                ctx=c.getContext("2d");
+                c.width=2000;
+                c.height=501;
+                setDirs([
+                    ". .",
+                    "  .",
+                    ". ."
+                ],".",-1,-1);
+                createEmptyPile(c.width,c.height);
+                addToPile(50,250,2000000);
+                interval(step,draw,1000);
+            };
+        </script>
+    </head>
+    <body>
+        <canvas id="c"></canvas><button onclick="paused=!paused;">Hide</button>
+    </body>
+</html>

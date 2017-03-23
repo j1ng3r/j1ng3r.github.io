@@ -1,0 +1,134 @@
+<!DocType Html>
+<html>
+    <head>
+        <script src="js/expand.js"></script>
+        <script>
+            pile=[[10000000]];
+            function isCenter(x,y){
+                return x==0&&y==0;
+            }
+            function isOnEdge(x,y){
+                return y==0||x==y;
+            }
+            function edges(x,y){
+                return(y==0)+(x==y);
+            }
+            function add(x,y,a){
+                return set(x,y,get(x,y)+a);
+            }
+            function get(x,y){
+                return(pile[x]&&pile[x][y])||0;
+            }
+            function exists(x,y){
+                return x>=0&&y>=0&&x<=y;
+            }
+            function set(x,y,a){
+                if(exists(x,y)){
+                    if(!pile[x])pile[x]=[];
+                    pile[x][y]=a;
+                }
+            }
+            function clear(a){
+			    pile=[[a]];
+            }
+            function collapse(){
+                for(var x=0,y,z,v,w,d=(X,Y)=>{
+                    X+=x;
+                    Y+=y;
+                    let e=edges(X,Y);
+                    if(!z){
+                        add(X,Y,v*Math.pow(2,edges(X,Y)));
+                    } else if(e==2){
+                        add(X,Y,v*4);
+                    } else if(X==Y){
+                        add(X,Y,v)
+                    } else {
+                        add(X,Y,v);
+                    }
+                };x<pile.length;x++){
+                    for(y=0;y<pile[x].length;y++){
+                        v=get(x,y);
+                        w=v%4;
+                        v=Math.floor(v/4);
+                        if(v){
+                            z=edges(x,y);
+                            if(z==2){
+                                add(x,y+1,v);
+                            } else {
+                                d(0,1);
+                                d(0,-1);
+                                d(1,0);
+                                d(-1,0);
+                            }
+                        }
+                        set(x,y,w);
+                        console.print(pile);
+                    }
+                }
+            }
+            function eq(p,q){
+                for(let j=0;j<p.length;j++){
+                    for(let i=0;i<p[j].length;i++){
+                        if(p[j][i]!=q[j][i])return false;
+                    }
+                }
+                return true;
+            }
+            function fullcollapse(){
+                while(!eq(pile,collapse(pile)));
+                return pile;
+            }
+            function test(x,y,v){
+                createEmptyPile(x,y);
+                addToPile(Math.floor(x/2),Math.floor(y/2),v);
+                fullcollapse();
+                draw();
+            }
+            function step(){
+                if(pile.length&&on)collapse();
+            }
+            function parse(){
+                for(var x=0,a=new Array(pile.length).fill(""),s="0123",y;x<pile.length;x++){
+                    for(y=0;y<pile[x].length;y++){
+                        a[x]+=s[get(x,y)]||4;
+                    }
+                }
+                return`\n${a.join("\n")}\n`;
+            }
+            function draw(){
+                if(!paused){
+                    ctx.fillStyle="#fff";
+                    ctx.fillRect(0,0,c.width,c.height);
+                    for(let x=0;x<pile.length;x++){
+                        for(let y=0;y<=pile[x].length;y++){
+                            if(pile[x][y]>0){
+                                ctx.fillStyle=pile[x][y]<4?["#c0c0ff","#8080ff","#4040ff"][pile[x][y]-1]:"#00f";
+                                ctx.fillRect(x,y,1,1);
+                                ctx.fillRect(y,x,1,1);
+                            }
+                        }
+                    }
+                }
+            }
+            paused=false;
+            on=false;
+            window.onload=function(){
+                ctx=c.getContext("2d");
+                c.width=2001;
+                c.height=1001;
+                interval(step,draw,10000000);
+            };
+            function sum(){
+                for(var x=0,sum=0,y;x<pile.length;x++){
+                    for(y=0;y<pile[x].length;y++){
+                        sum+=get(x,y);
+                    }
+                }
+                return sum;
+            }
+        </script>
+    </head>
+    <body>
+        <canvas id="c"></canvas><button onclick="(_=>{paused=!paused;this.innerHTML=this.innerHTML=='Hide'?'Show':'Hide'})()">Hide</button><button onclick="(_=>{on=!on;this.innerHTML=this.innerHTML=='Play'?'Pause':'Play'})()">Play</button>
+    </body>
+</html>
