@@ -6,7 +6,7 @@ window.onresize=dimensionCanvas;
 localStorage.setItem("willKeep",+localStorage.getItem("willKeep"));
 var pad=new Controller("a",{
 	"start":"Left Arrow|Space|Pad0Button0",
-	"jump":"Up Arrow|Space|Pad0Button3",
+	"jump":"Up Arrow|Space|Z|Pad0Button3",
 	"dash":"Right Arrow|Pad0Button1",
 	"fall":"Down Arrow|Pad0Button2",
     "refresh":"R",
