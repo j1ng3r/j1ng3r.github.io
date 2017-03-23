@@ -1,0 +1,35 @@
+<!DocType Html>
+<html>
+    <head>
+        <script>
+            function b(c){
+                if(!win)document.body.style.background=c;
+            }
+            num=0;
+            win=0;
+            document.onkeydown=function(e){
+                if(win)return win=null;
+                if(e.key!=" ")return;
+                num++;
+                if(num==1){
+                    b("#00f");
+                } else if(num==2){
+                    b("#0f0");
+                } else {
+                    b("#000");
+                }
+            };
+            document.onkeyup=function(e){
+                if(e.key!=" "&&win!=null)return;
+                if(num==2)win=1;else win=0;
+                b("#000");
+                num=0;
+            };
+            window.onload=_=>b("#000");
+        </script>
+    </head>
+    <body></body>
+</html>
+<!--
+"!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~ Ʃƪ÷øƔƐƑƒƗƚ×¶¿¡¢£¤¥¦§©«¬»±µÞßðñĸŦŧſƆƋƍƎƏƜƝƞƟƢƣƥƦƧƨ"
+-->
