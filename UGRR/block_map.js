@@ -9,9 +9,9 @@ function Block(o){
     this.y=+o.y;
     if(this.x!=this.x||this.y!=this.y){throw new TypeError("x or y is NaN");}
     this.name=o.name||"Anonymous";
-    this.floor=o.floor&&o.floor.length==1?o.floor:" ";
-    this.ceil=o.ceil&&o.ceil.length==1?o.ceil:"";
     this.char=o.char&&o.char.length==1?o.char:" ";
+    this.floor=o.floor&&o.floor.length==1?o.floor:this.char==" "?" ":".";
+    this.ceil=o.ceil&&o.ceil.length==1?o.ceil:"";
     this[Symbol.toPrimitive]=_=>this.char;
     this.color=(o.color||"#fff")+"";
     this.background=(o.background||"#000")+"";
@@ -51,10 +51,14 @@ Object.assign(Block.prototype,{
         for(let i=0;i<map.length;i++){
             map[i].index=i;
         }
+        if(this.char!=" ")this.generateFloor();
     },
     setFloor(char){
         this.floor=char;
         char.ceil=this;
+    },
+    generateFloor(x,y){
+        map.setSimpleChar((x-this.x||0)+this.x,(y-this.y||0)+this.y,this.floor);
     },
     removeFloor(char){
         this.floor="";
@@ -68,7 +72,7 @@ Object.assign(Block.prototype,{
             this.x+=x;
             this.y+=y;
             if(typeof this.floor=="string"){
-                map.setSimpleChar(p.x,p.y,this.floor);
+                this.generateFloor(p.x,p.y);
             } else {
                 this.removeFloor(this.floor);
             }
@@ -116,7 +120,10 @@ map=Object.assign([],{
     AddSimpleChunk(o){
         for(let Y=0;Y<o.array.length;Y++){
             for(let X=0;X<o.array[Y].length;X++){
-                if(o.array[Y][X]!=" "&&!this.CanPlace({x:X+o.x,y:Y+o.y}))return 0;
+                if(o.array[Y][X]!=" "&&!this.CanPlace({x:X+o.x,y:Y+o.y})){
+                    console.warn(`AddSimpleChunk failed at (${X+o.x},${Y+o.y}), placing ${o.array[Y][X]}`);
+                    return false;
+                }
             }
         }
         for(let Y=0;Y<o.array.length;Y++){
@@ -128,7 +135,7 @@ map=Object.assign([],{
                 });
             }
         }
-        return 1;
+        return true;
     },
     kill(x,y){
         return this.Kill({x:x,y:y});
@@ -191,7 +198,7 @@ map=Object.assign([],{
         return this.AddPerson(Object.assign({},o,{x:x,y:y}));
     },
     AddPerson(o){
-        let _=o.interact||function(){this.dialog("Hi!");};
+        let _=o.interact||function(){this.dialog(`Hi! I'm ${this.name}!`);};
         let x=this.AddChar(Object.assign({
             char:"@"
         },o,{interact(p){if(!state.prompt)_.apply(this,[p]);}}));
@@ -205,6 +212,17 @@ map=Object.assign([],{
     },
     getChar(x,y){
         return this.GetChar({x:x,y:y});
+    },
+    charExists(x,y){
+        return this.CharExists({x:x,y:y});
+    },
+    CharExists(o){
+        for(let i=0;i<this.length;i++){
+            if(this[i].x==o.x&&this[i].y==o.y&&!this[i].ceil){
+                return true;
+            }
+        }
+        return false;
     },
     GetChar(o){
         for(let i=0;i<this.length;i++){

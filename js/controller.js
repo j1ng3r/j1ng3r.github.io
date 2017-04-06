@@ -24,14 +24,15 @@ window.Controller=function(){
 			},
 			getInput(n){
 				if(!this.scheme.hasOwnProperty(n))throw`No property ${n} exists on this controller.`;
-				for(var _ = this.scheme[n].split("|"),a=Controller.window.navigator.getGamepads(),b,validGamepads=[],i=0,j;i<a.length;i++)
+				this.gamePads=[];
+				for(var _ = this.scheme[n].split("|"),a=Controller.window.navigator.getGamepads(),b,i=0,j;i<a.length;i++)
 					if(a[i]&&a[i].buttons&&a[i].buttons.length)
-						validGamepads.push(a[i]);
+						this.gamePads.push(a[i]);
 				for(j=0;j<_.length;j++){
 					i=_[j].trim();
 					b=(i.match(/\d+/g)||[])[1];
 					if(i.slice(0,3)=="Pad"){
-						if(a=validGamepads[i[3]])this.input[n]=(
+						if(a=this.gamePads[i[3]])this.input[n]=(
 							i.slice(4,8)!="Axis"?
 								a.buttons[b].value
 							:/[+-]$/.test(i)?

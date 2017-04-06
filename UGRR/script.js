@@ -137,7 +137,8 @@ function step(){
             ("Name: "+player.name).split("").slice(0,box-4),
             getBar("Health","#ff0000","#00ff00"),
             getBar("Energy","#000000","#ffff00"),
-            getBar("Hunger","#00ff00","#ff0000")
+            getBar("Hunger","#00ff00","#ff0000"),
+            "Money: "+player.money
         ];
         map.act();
         map.draw();
@@ -191,8 +192,8 @@ function start(){
                                 "|.........................................................|.............................................",
                                 "|.........................................................|.............................................",
                                 "|.........................................................|.............................................",
-                                "|...................         .         ...................|.............................................",
-                                "|...................                   ......... .........|.............................................",
+                                "|...................                   ...................|.............................................",
+                                "|...................                   ...................|.............................................",
                                 "|...................                   ...................|.............................................",
                                 "|...................                   ...................|.............................................",
                                 "|...................                   ...................|.............................................",
@@ -207,13 +208,12 @@ function start(){
                                 "|.........................................................|.............................................",
                                 "|.........................................................|.............................................",
                                 "|........... .............................................|.............................................",
-                                "|.........................................................|.............................................",
+                                "|........................................................ |.............................................",
                                 "+---------------------------------------------------------+............................................."
                             ]);
                             map.AddPerson({
                                 x:13,
                                 y:6,
-                                floor:".",
                                 interact(){
                                     log("He doesn't want to talk.");
                                 },
@@ -238,14 +238,39 @@ function start(){
                                 color:"#fff",
                                 interact(player){
                                     this.hasTalked=true;
-                                    this.dialog("Wha'ter yuo doin walk'n aroun, n'hoht  workin!? Irl beet ye cilee! Yoo blubbberign' idiot! Git ba'k ta dwerk!");
+                                    this.dialog("Wa'ter yuo doin walk'in aroun, n'hoht  workin!? Irl beet ye sely! Yoo blubbberign' id'yit! Git ba'k ta dwerk!");
                                 }
                             });
                             map.AddPerson({
-                                x:6,
-                                y:-8,
-                                name:"Alex",
-                                color:"#630"
+                                x:-24,
+                                y:5,
+                                name:"Frederick",
+                                color:"#840",
+                                interact(player){
+                                    if(map.getPerson("Mortimer Apos-Trophy").hasTalked){
+                                        if(this.hasTalked){
+                                            this.dialog(`You went and actually talked to him like a normal human being!\n...\nI'm just surprised you're not dead.`);
+                                        } else {
+                                            this.dialog(`I see you've met Mortimer. As you've probably noticed, he's not too bright, but the funny thing is he thinks WE'RE the unintelligent ones!`);
+                                        }
+                                    } else if(this.hasTalked){
+                                        this.dialog(`I'd be careful of Mortimer, the "Master" around here.\nTo be honest, though, he's not really the master of anything.`);
+                                    } else {
+                                        this.hasTalked=true;
+                                        this.dialog(`Watch out for Mortimer (or Mor, as he likes to be called).\nHe may not seem threatening, but he would beat you to death if you annoyed him in any way.`);
+                                    }
+                                }
+                            });
+                            map.AddPerson({
+                                x:28,
+                                y:12,
+                                name:"Link",
+                                color:"#555",
+                                interact(player){
+                                    this.dialog("It's dangerous to go alone. Take this!");
+                                    player.money+=50;
+                                    this.kill();
+                                }
                             });
                         }
                     });},
@@ -287,7 +312,6 @@ window.onload=function(){
         y:0,
         char:"@",
         color:"#88f",
-        floor:".",
         act(){
             if(state.prompt){
                 if(dir.y+dir.z){
@@ -318,6 +342,7 @@ window.onload=function(){
         },
         scout:0
     });
+    player.money=0;
     player.HEALTH=20;
     player.ENERGY=20;
     player.HUNGER=20;

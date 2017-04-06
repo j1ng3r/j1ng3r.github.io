@@ -1,7 +1,26 @@
 <!DocType Html>
 <html>
     <head>
-        <script src="js/expand.js"></script>
+        <style>
+            html, body {
+                margin:0px;
+            }
+            button {
+                background:teal;
+                padding:5px;
+                color:white;
+                font-weight: 700;
+                margin:3px;
+            }
+            #vis::before {
+                background:transparent;
+                content:'Hide';
+            }
+            body #vis[data='1']::before {
+                content:'Show';
+            }
+        </style>
+        <script src="expand.js"></script>
         <script>
             pile=[[10000000]];
             function isCenter(x,y){
@@ -11,7 +30,7 @@
                 return y==0||x==y;
             }
             function edges(x,y){
-                return(y==0)+(x==y);
+                return(x==0)+(x==y);
             }
             function add(x,y,a){
                 return set(x,y,get(x,y)+a);
@@ -36,15 +55,7 @@
                     X+=x;
                     Y+=y;
                     let e=edges(X,Y);
-                    if(!z){
-                        add(X,Y,v*Math.pow(2,edges(X,Y)));
-                    } else if(e==2){
-                        add(X,Y,v*4);
-                    } else if(X==Y){
-                        add(X,Y,v)
-                    } else {
-                        add(X,Y,v);
-                    }
+                    add(X,Y,v*(!z||e==2||X==Y||(e&&x==y)?Math.pow(2,e):1));
                 };x<pile.length;x++){
                     for(y=0;y<pile[x].length;y++){
                         v=get(x,y);
@@ -62,7 +73,7 @@
                             }
                         }
                         set(x,y,w);
-                        console.print(pile);
+                        console.log(x,y,parse());
                     }
                 }
             }
@@ -88,9 +99,9 @@
                 if(pile.length&&on)collapse();
             }
             function parse(){
-                for(var x=0,a=new Array(pile.length).fill(""),s="0123",y;x<pile.length;x++){
+                for(var x=0,a=new Array(pile[0].length).fill(""),s="0123",y;x<pile.length;x++){
                     for(y=0;y<pile[x].length;y++){
-                        a[x]+=s[get(x,y)]||4;
+                        a[y]+=get(x,y)>9?"+":get(x,y);
                     }
                 }
                 return`\n${a.join("\n")}\n`;
@@ -126,9 +137,10 @@
                 }
                 return sum;
             }
+            var a=0;
         </script>
     </head>
     <body>
-        <canvas id="c"></canvas><button onclick="(_=>{paused=!paused;this.innerHTML=this.innerHTML=='Hide'?'Show':'Hide'})()">Hide</button><button onclick="(_=>{on=!on;this.innerHTML=this.innerHTML=='Play'?'Pause':'Play'})()">Play</button>
+        <canvas id="c"></canvas><button id='vis' onclick="paused=!paused;this.setAttribute('data',+paused);"></button><button id='play' onclick="on=!on;this.innerHTML=this.innerHTML=='Play'?'Pause':'Play';">Play</button>
     </body>
 </html>

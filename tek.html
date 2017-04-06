@@ -2,30 +2,21 @@
 <html>
     <head>
         <script>
-            function b(c){
-                if(!win)document.body.style.background=c;
-            }
-            num=0;
-            win=0;
-            document.onkeydown=function(e){
-                if(win)return win=null;
+            b=c=>!w&&(d.body.style.background="#0"+(c||"00"));
+            n=0;
+            w=!1;
+            d=document;
+            d.onkeydown=e=>{
+                if(w)return w=0;
                 if(e.key!=" ")return;
-                num++;
-                if(num==1){
-                    b("#00f");
-                } else if(num==2){
-                    b("#0f0");
-                } else {
-                    b("#000");
-                }
+                b(++n==1?"0f":n==2?"f0":0);
             };
-            document.onkeyup=function(e){
-                if(e.key!=" "&&win!=null)return;
-                if(num==2)win=1;else win=0;
-                b("#000");
-                num=0;
+            d.onkeyup=e=>{
+                if(e.key!=" "&&w!==0)return;
+                w=n==2;
+                b(n=0);
             };
-            window.onload=_=>b("#000");
+            onload=_=>b();
         </script>
     </head>
     <body></body>
