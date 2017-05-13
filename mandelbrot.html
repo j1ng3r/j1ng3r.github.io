@@ -1,0 +1,46 @@
+<!DocType Html>
+<html>
+    <head>
+        <link href="js/fullscreen.css" rel="stylesheet">
+        <script src="js/expand.js"></script>
+        <script src="js/math.min.js"></script>
+        <script>
+            ctx=null;
+            eq="z^2+C";
+            iters=10000;
+            si=-2;
+            ei=2;
+            sr=-2;
+            er=2;
+            ti=0.01;
+            tr=0.01;
+            function col(r,i){
+            	var C=math.complex(r,i),z=0,f=math.eval("f(z,C)="+eq);
+            	for(var i=0;i<iters;i++){
+            		z=f(z,C);
+            		if(z.abs()>2){
+                        return"#"+(2550/(i+10)).toString(16).slice(0,2).repeat(3);
+                    }
+                }
+            	return"#000";
+            }
+            var i=si,r,v,y=0;
+            function go(){
+                for(var i=si,r,v,y=0;i<=ei;i+=ti){
+                    x=0;
+                    for(r=sr;r<er;r+=tr){
+                        ctx.fillStyle=col(r,i);
+                        ctx.fillRect(x,y,1,1);
+                        x++;
+                    }
+                    y++;
+                }
+            }
+            window.onload=function(){
+                ctx=c.getContext("2d");
+                go();
+            };
+        </script>
+    </head>
+    <body><canvas id="c"></canvas></body>
+</html>
