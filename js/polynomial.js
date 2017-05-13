@@ -66,5 +66,11 @@ Object.assign(Polynomial.prototype,{
             t+=` + ${this.list[i].toString()}x^${i}`;
         }
         return t;
+    },
+    getValueAt(x){
+        for(var i=0,sum=0;i<this.list.length;i++){
+            sum+=this.list[i].eval()*Math.pow(x,i);
+        }
+        return sum;
     }
 });

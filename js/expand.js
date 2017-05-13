@@ -59,7 +59,7 @@ Object.assign(Number,{
     }
 });
 Object.assign(Math,{
-    rand(a,b){return arguments.length?+a+(+b-a)*Math.random():Math.random();},
+    rand(a,b){return arguments.length?(a&&a.length)?a[Math.floor(Math.random()*a.length)]:Number.eval(a)+(Number.eval(b)-Number.eval(a))*Math.random():Math.random();},
     sq(a){return a*a;},
     mod(a,b){return a-b*Math.floor(a/b);},
     factor(n){

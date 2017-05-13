@@ -5,7 +5,7 @@ function Point(x,y){
 		this.set(x[0]||x.x||x.width,x[1]||x.y||x.height);
 	else this.set(x,y);
 }
-Point.prototype=Object.assign(Point.prototype,{
+Object.assign(Point.prototype,{
 	set(x,y){
 		this.x=+x||this.x||0;
 		this.y=+y||this.y||0;
