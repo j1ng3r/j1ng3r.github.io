@@ -75,7 +75,7 @@ window.onload=function(){
     c.width=window.innerWidth;
     c.height=window.innerHeight;
     ctx=c.getContext('2d');
-    interval(step,draw,60);
+    interval(step,draw,2000);
     endpoints
         .add(Math.rand(c.width),Math.rand(c.height))
         .add(Math.rand(c.width),Math.rand(c.height))
