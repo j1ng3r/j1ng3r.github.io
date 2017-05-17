@@ -41,10 +41,9 @@ class Vector {
         return Math.sqrt(this.getMag2());
     }
     getMag2(){
-        return Object.keys(this).reduce((a,i)=>a+this[i]**2,0);
-    }
-    getAngleVector(){
-        return this.scale(1/this.getMag());
+        for(var sum=0,i=0;i<Vector.dim.length;i++)
+            sum+=this[Vector.dim[i]]**2;
+        return sum;
     }
     getDist(){
         return(new Vector(arguments)).sub(this);
@@ -60,11 +59,7 @@ class Point {
         this.a=new Vector();
     }
     getP(){
-        this.p.addS(this.v.scale(d)//.add(this.a.scale(d*d/2))
-        );
-        if(this.p.getMag2()>R*R){
-            this.p.subS(this.p.getAngleVector().scale(2*R));
-        }
+        this.p.addS(this.v.scale(d).add(this.a.scale(d/2)));
         return this;
     }
     getV(){
@@ -72,10 +67,16 @@ class Point {
         return this;
     }
     getA(){
-        let dif,unit;
-        this.a=map.reduce(((a,P)=>
-            P==this?a:(dif=this.p.getDist(P.p),a.add(dif.scale(P.m/Math.pow(dif.getMag2(),1.5))))
-        ),new Vector()).scale(G);
+        if(!this.n)this.n=0;
+        this.n--;
+        this.a=new Vector();
+        for(let i=0,mag,dif,unit;i<map.length;i++)if(map[i]!=this){
+            dif=this.p.getDist(map[i].p);
+            mag=map[i].m/dif.getMag2();
+            unit=dif.scale(mag/dif.getMag());
+            this.a.addS(unit);
+        }
+        this.a.scaleS(G);
         return this;
     }
     draw(){
@@ -85,19 +86,18 @@ class Point {
         return(this.s+o.s)**2>this.p.getDist(o.p).getMag2();
     }
 }
-maxV=0.4;
+maxV=6;
 d=1/16;
-G=2;
-R=100;
+G=3;
 map=Object.assign([],{
-    do(...a){a.forEach(V=>this[V]=_=>this.forEach(v=>v[V](_))||this);},
-    step(_){this.getA().getV().getD().getP().collide();},
+    do(a){this[a]=_=>{for(var i=0;i<this.length;i++)this[i][a](_);return this;}},
+    step(_){this.time().getA().getV().getD().getP().timeEnd().time().collide().timeEnd();},
     add(m,p,v){
         this.push(new Point(m,p,v));
         return this;
     },
     getD(){
-        d=maxV/this.reduce((a,P)=>Math.max(a,P.v.getMag()),0);
+        d=maxV/this.reduce((a,v)=>Math.max(a,v.v.getMag()))/16;
         return this;
     },
     collide(){
@@ -127,68 +127,44 @@ map=Object.assign([],{
         return this;
     }
 });
-map.do("getA","getV","getP","draw");
-/*map
-    .add(400,[0,0],[0,0])
-    .add(1,[400,0],[0,2])
-    .add(1,[100,0],[0,3]);
-;*/
-for(let i=0,r,t,v,n=200,D=50;i<n;i++){
-    r=Math.sqrt(Math.rand(0,n*D));
-    m=Math.rand(0.3,1);
+map.do("getA");
+map.do("getV");
+map.do("getP");
+map.do("draw");
+map
+//    .add(2000,[0,0],[0,0])
+;
+for(let i=0,r,t,v;i<2000;i++){
+    r=Math.sqrt(Math.rand(0,100000));
     t=Math.rand(0,2*Math.PI);
-    v=Math.sqrt(G*n*m/r);
-    map.add(m,[r*Math.cos(t),r*Math.sin(t)],[Math.sin(t)*v,-Math.cos(t)*v]);
-}
-for(let i=0,r,t,v;i<50;i++){
-    r=Math.sqrt(Math.rand(0,1000));
-    t=Math.rand(0,2*Math.PI);
-    //v=Math.rand(-5,7)*G;
-    map.add(Math.rand(0.3,1),[r*Math.cos(t),r*Math.sin(t)],[Math.sin(t)*v/Math.sqrt(r),-Math.cos(t)*v/Math.sqrt(r)]);
+    v=Math.rand(-5,7);
+    map.add(Math.rand(0.3,1),[r*Math.cos(t),r*Math.sin(t)],[Math.sin(t)*v,-Math.cos(t)*v]);
 }
 
 //You can ignore this
 ctx=null;
-t={x:0,y:0,s:1};
 function rekt(x,y,s){
     ctx.beginPath();
-    ctx.arc((x-t.x)/t.s,(y-t.y)/t.s,s/t.s,0,2*Math.PI);
+    ctx.arc(x,y,s,0,2*Math.PI);
     ctx.closePath();
     ctx.fill();
     //ctx.fillRect(x-s/2,y-s/2,s,s);
 }
 function draw(){
     ctx.fillStyle="#000";
-    ctx.fillRect(-c.width/2-1,-c.height/2-1,c.width+2,c.height+2);
-    ctx.fillStyle="#fff";
-    rekt(0,0,R+4);
-    ctx.fillStyle="#000";
-    rekt(0,0,R);
+    rekt(0,0,c.width,c.height);
     ctx.fillStyle="#fff";
     map.draw();
-}
-function step(){
-    map.step();
+    for(var i=-100;i<=100;i+=10){
+        for(var j=-100;j<=100;j+=10){
+            //rekt(i,j,1);
+        }
+    }
 }
 window.onload=function(){
     c.width=window.innerWidth;
     c.height=window.innerHeight;
     ctx=c.getContext('2d');
     ctx.translate(c.width/2,c.height/2);
-    interval(step,draw,60);
-    document.addEventListener("keydown",function(e){
-        if(e.key=="a"){
-            t.x-=t.s;
-        } else if(e.key=="d"){
-            t.x+=t.s;
-        } else if(e.key=="w"){
-            t.y-=t.s;
-        } else if(e.key=="s"){
-            t.y+=t.s;
-        } else if(e.key=="q"){
-            t.s*=1.05;
-        } else if(e.key=="e"){
-            t.s/=1.05;
-        }
-    });
+    interval(map.step.bind(map),draw,60);
 };
