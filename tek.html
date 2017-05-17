@@ -6,16 +6,8 @@
             n=0;
             w=!1;
             d=document;
-            d.onkeydown=e=>{
-                if(w)return w=0;
-                if(e.key!=" ")return;
-                b(++n==1?"0f":n==2?"f0":0);
-            };
-            d.onkeyup=e=>{
-                if(e.key!=" "&&w!==0)return;
-                w=n==2;
-                b(n=0);
-            };
+            d.onkeydown=e=>w?w=0:e.key==" "&&b(++n==1?"0f":n==2?"f0":0);
+            d.onkeyup=e=>(e.key==" "||w===0)&&b(n=0*(w=n==2));
             onload=_=>b();
         </script>
     </head>
