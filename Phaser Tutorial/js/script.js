@@ -1,4 +1,5 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
+var game;
+game=new Phaser.Game(800, 600, Phaser.AUTO, '', {
 	preload(){
 		game.load.image('sky', 'assets/sky.png');
 		game.load.image('ground', 'assets/platform.png');
@@ -26,7 +27,6 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', {
 		player.body.bounce.y = 0;
 		player.body.collideWorldBounds = false;
 
-		//  Our two animations, walking left and right.
 		player.animations.add('stand',[0],10,true);
 		player.animations.add('fall',[0],10,true);
 		player.animations.add("ffall",[0],10,true);
