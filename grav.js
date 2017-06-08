@@ -72,11 +72,14 @@ class Point {
         return this;
     }
     getA(){
-        let dif,unit;
+        let dif;
         this.a=map.reduce(((a,P)=>
-            P==this?a:(dif=this.p.getDist(P.p),a.add(dif.scale(P.m/Math.pow(dif.getMag2(),1.5))))
+            P==this?a:(dif=this.p.getDist(P.p),a.add(dif.scale(P.m/(dif.getMag2()**1.5))))
         ),new Vector()).scale(G);
         return this;
+
+        //dif=this.p.getDist(P.p);                 return a.add(dif.scale(P.m/(dif.getMag2()**1.5)));
+        //dif=V.dist(this.get("pos"),P.get("pos"));return V.add(a,V.scale(dif,P.get("mas")/V.getMag(dif)**3));
     }
     draw(){
         rekt(this.p.x,this.p.y,this.s);
@@ -89,9 +92,11 @@ maxV=0.4;
 d=1/16;
 G=2;
 R=100;
+
 map=Object.assign([],{
     do(...a){a.forEach(V=>this[V]=_=>this.forEach(v=>v[V](_))||this);},
-    step(_){this.getA().getV().getD().getP().collide();},
+    step(){this.getA().getV().getD().getP().collide();},
+    //step:R.compose(M.collide,M.getP,M.getD,M.getV,M.getA),
     add(m,p,v){
         this.push(new Point(m,p,v));
         return this;
