@@ -1,0 +1,83 @@
+<html>
+    <head><title>Treee Gen</title><script src="js/expand.js"></script><link rel="stylesheet" href="js/fullscreen.css"></head>
+    <body>
+        <canvas id="c"></canvas>
+        <script>
+            Math.TAU=2*Math.PI;
+            let sin=z=>Math.sin(Math.TAU*z);
+            let cos=z=>Math.cos(Math.TAU*z);
+            let time=0;
+            let length=n=>200/Math.pow(n*n+1,0.6);
+            let angle=n=>30/360*(2*Math.random()-1);
+            let sway=t=>sin(t/300)/300;
+            let bc=2;
+            let b;
+            let omega=10;
+
+            function line(x,y,a,l){
+                ctx.beginPath();
+                ctx.moveTo(x,y);
+                ctx.lineTo(x+l*cos(a),y+l*sin(a))
+                ctx.closePath();
+                ctx.stroke();
+            }
+            function Branch(o){
+                Object.assign(this,o);
+                console.log(this);
+                this.time=time;
+                this.fertile=this.gen<=omega;
+                this.length=length(this.gen);
+                this.bangle=this.gen&&angle(this.gen);
+                this.children=[];
+            }
+            Object.assign(Branch.prototype,{
+                step(){
+                    this.x=this.parent.nx;
+                    this.y=this.parent.ny;
+                    this.angle=this.parent.angle+this.bangle+sway(time);
+                    this.nx=this.x+this.length*cos(this.angle);
+                    this.ny=this.y+this.length*sin(this.angle);
+                    if(this.fertile&&time-this.time>=this.length){
+                        this.fertile=false;
+                        for(let i=0;i<bc;i++)
+                            this.children.push(new Branch({
+                                parent:this,
+                                gen:this.gen+1,
+                                angle:this.angle
+                            }));
+                    }
+                    this.children.forEach(v=>v.step());
+                },
+                draw(){
+                    line(this.x,this.y,this.angle,Math.min(time-this.time,this.length));
+                    this.children.forEach(v=>v.draw());
+                }
+            });
+            function step(){
+                time++;
+                b.step();
+            }
+            function draw(){
+                ctx.fillRect(0,0,c.width,c.height);
+                b.draw();
+            }
+            window.onload=_=>{
+                c.width=window.innerWidth;
+                c.height=window.innerHeight;
+                ctx=c.getContext("2d");
+                ctx.fillStyle="#000";
+                ctx.strokeStyle="#fff";
+                ctx.lineWidth=3;
+                b=new Branch({
+                    parent:{
+                        nx:window.innerHeight-50,
+                        ny:window.innerWidth/2,
+                        angle:3/4
+                    },
+                    gen:0
+                });
+                interval(step,draw,60);
+            };
+        </script>
+    </body>
+</html>

@@ -1,0 +1,1 @@
+((a,i)=>{a=document.querySelectorAll("a"); for(i in a)if(/see score/.test(a[i].innerHTML))eval(a[i].href.slice(11));})()

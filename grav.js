@@ -91,7 +91,7 @@ class Point {
 maxV=0.4;
 d=1/16;
 G=2;
-R=100;
+R=10000;
 
 map=Object.assign([],{
     do(...a){a.forEach(V=>this[V]=_=>this.forEach(v=>v[V](_))||this);},

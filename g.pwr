@@ -1,100 +1,124 @@
-vector$...a{vector.dimLi,v=$[v]=$getval(i,a);}{
+vector$...a{vector.dimLi,v=$[v]=$getval(i,a);}O[
     getvalFi,v=v?v.0TO?$getval(i,v.0):+v[vector.dim[i]]|+v[i]|+v|0:0;
     cloneF=vector($);
     +FaTvector=$map(Fi,v=v+a[i]);
     -FaTvector=$map(Fi,v=v-{i++;a[i]});
     *Fa=(...$*a)[];
     /Fa=(...$/a)[];
-    ^Fa=$getmag2()^(a/2);
+    ^Fa=$getmag2C^(a/2);
     **Fa=$^a;
     //Fa=$^(1/a);
     %Fa=(...$%a)[];
-    [e][0]==e
-        [...$%a][0]==...$%a;
     getmag2F=$reduce(Fa,i,v=a+v^2,0);
     getanglevectorF=$/$^1;
     getdistF...a=vector(a)-$;
-}{
+]O[
     dim="xy".split("");
-};
-O[
-
-]
+];
 #a=1,b=2;
-{}
-point$m,p,v{
+point$m,pTvector,vTvector{
     $m=m;
     $s=m//3;
-    $p=vector(p);
-    $v=vector(v);
-    $a=vector();
-}{
+    $p=p;
+    $v=v;
+    $a=vectorC;
+}O[
     getpF{
         $p+=$v*d+$a/2*d^2;
-        $p^2>rad^2?$p-=$p.getanglevector()*2*rad;
+        $p^2>rad^2?$p-=$p.getanglevectorC*2*rad;
     }
     getvF=$v+=$a*d;
     getaF{
         #dif;
         $a=map.reduce((Fa,p=
-            p==$?a:{dif=p.p-$p;a+dif*p.m/dif^3}
-        ),vector())*g;
+            p==$?a:{
+                dif=p.p-$p;
+                a+dif*p.m/dif^3
+            }
+        ),vectorC)*g;
     }
     drawF=rekt($p.x,$p.y,$s);
-    iscollidingFo=(this.s+o.s)^2>this.p.getDist(o.p)^2;
-};
+    iscollidingFo=($s+o.s)^2>this.p.getdist(o.p)^2;
+];
 maxv=0.4;
 d=1/16;
 g=2;
 rad=100;
 
-map=[]++O{
-\I haven't edited below this point'\
-    do(...a){a.forEach(V=>this[V]=_=>this.forEach(v=>v[V](_))||this);},
-    step(){this.getA().getV().getD().getP().collide();},
+\
+Array
+Break
+Call
+Delete
+E
+Function
+G
+H
+Imaginary
+J
+K
+Loop
+M
+N
+Object
+P
+Q
+R
+String
+Typeof
+Undefined
+V
+W
+X
+Y
+Z
+\
 
-    //step:R.compose(M.collide,M.getP,M.getD,M.getV,M.getA),
-    add(m,p,v){
-        this.push(new Point(m,p,v));
-        return this;
-    },
-    getD(){
-        d=maxV/this.reduce((a,P)=>Math.max(a,P.v.getMag()),0);
-        return this;
-    },
-    collide(){
-        for(var i=0,I,j,J,M;i<this.length;i++){
-            for(j=i+1;j<this.length;j++){
-                if(this[i].isColliding(this[j])){
-                    J=this.splice(j,1)[0];
-                    I=this[i];
-                    M=I.m+J.m;
-                    this[i]=new Point(
-                        M,
-                        I.p.scale(I.m).add(J.p.scale(J.m)).scale(1/M),
-                        I.v.scale(I.m).add(J.v.scale(J.m)).scale(1/M)
+map=[]++O[
+    doF...a{
+        aL,w=$[w]F_{
+            $L,v=v[w](_);
+        }
+    stepF=$getaCgetvCgetdCgetpCcollideC;
+    addFm,p,v{
+        $+*=point(m,p,v);
+    }
+    getdF{
+        d=maxv/$reduce((Fa,p=Mmax(a,p.v^1)),0);
+    }
+    collideF{
+        $Li,v{
+            #j=i+1;
+            Lj<$length{
+                #w=$[j];
+                v.iscolliding(w)?{
+                    $D[j];
+                    #m=v.m+w.m;
+                    $[i]=point(
+                        m,
+                        (v.p*v.m+w.p*w.m)/m,
+                        (v.v*v.m+w.v*w.m)/m
                     );
-                    j=i+1;
+                    j=i;
                 }
+                j++;
             }
         }
-        return this;
-    },
-    time(){
-        console.time();
-        return this;
-    },
-    timeEnd(){
-        console.timeEnd();
-        return this;
     }
-};
-map.do("getA","getV","getP","draw");
-/*map
+    timeF{
+        console.timeC;
+    }
+    timeendF{
+        console.timeEndC;
+    }
+];
+map.do("geta","getv","geta","draw");
+\map
     .add(400,[0,0],[0,0])
     .add(1,[400,0],[0,2])
     .add(1,[100,0],[0,3]);
-;*/
+;\
+\I haven't edited below this line\
 for(let i=0,r,t,v,n=200,D=50;i<n;i++){
     r=Math.sqrt(Math.rand(0,n*D));
     m=Math.rand(0.3,1);

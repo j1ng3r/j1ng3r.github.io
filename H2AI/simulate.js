@@ -90,7 +90,8 @@ function Simulate(I){
     O.plate_cost=math.multiply(O.plate_weight,O.mat.cost);
     O.water_cost=math.multiply(O.water_weight,K.cost.H2O);
     O.electrolyte_cost=math.multiply(O.electrolyte_weight,K.cost[O.electrolyte_name]);
-    O.cost=math.add(O.plate_cost,O.water_cost,O.electrolyte_cost);
+    O.mcost=math.add(O.plate_cost,O.water_cost,O.electrolyte_cost);
+    O.ocost=O.watts*K.cost.electron; //Cost of electricity
 
     //Calculating size
     O.system_width=math.add(math.multiply(O.plate_dist,O.number_of_plates-1),math.multiply(O.plate_width,O.number_of_plates));
@@ -108,8 +109,9 @@ function Simulate(I){
         time:O.production_time.toNumber("s"),
         eff:O.efficiency,
         weight:O.weight.toNumber("g"),
-        cost:O.cost.toNumber("USD"),
-        size:O.size.toNumber("mm")
+        mcost:O.mcost.toNumber("USD"),
+        size:O.size.toNumber("mm"),
+        ocost:O.ocost.toNumber("USD / day")
     };
     return ret;
 }

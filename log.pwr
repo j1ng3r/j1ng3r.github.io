@@ -1,0 +1,18 @@
+aFx=x+1;
+cFn=n?Mln@a@c(n-1):(Fx=x);
+bFx,n=n?b(x,n-1)*a(c(n-1)(x)):1;
+fFx,n=b(x/n,n);
+
+lim=f(@,1000);
+
+\
+M=f=>{
+    let o={};
+    return(...a)=>a in o?o[a]:(o[a]=f.apply(this,a));
+};
+a=M(x=>x+1);
+c=M((x,n)=>n?Math.log(a(c(x,n-1))):x);
+b=M((x,n)=>n?b(x,n-1)*a(c(x,n-1)):1);
+f=M((x,n)=>b(x/n,n));
+lim=M(x=>f(x,1000));
+\

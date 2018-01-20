@@ -111,11 +111,11 @@ Object.assign(window,{
         req.open("GET", file, true);
         req.send(null);
     },
-    interval(logic,draw,logic_fps){
+    interval(step,draw,step_fps){
 		window.requestAnimationFrame(function a(){
 			draw();
 			window.requestAnimationFrame(a);
 		});
-		setInterval(logic,1000/logic_fps);
+		setInterval(step,1000/step_fps);
 	}
 });
