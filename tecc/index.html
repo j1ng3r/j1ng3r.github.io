@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <title>Tecc (Number 2)</title>
+        <style>
+            body {
+                font-size: 20px;
+                display:flex;
+                justify-content: center;
+                align-items: center;
+                color: black;
+                background: white;
+            }
+        </style>
+        <script>
+            let r=(a,b)=>a[Math.floor(Math.random()*a.length)];
+            let length = 10;
+            let score = -1;
+            let time=0;
+            let working=true;
+            let keys = "uiop".split("");
+            nk=_=>r(keys.filter(v=>v!=key))
+            key="Enter";
+            imgs={};
+            keys.forEach(v=>{
+                imgs[v]=Object.assign(new Image(),{
+                    src:`assets/${v}.png`
+                });
+                v+="w";
+                imgs[v]=Object.assign(new Image(),{
+                    src:`assets/${v}.png`
+                });
+            });
+            let html=()=>{
+                key=nk();
+                c.innerHTML=`<img src="assets/${key}.png">`;
+            };
+            window.onload=()=>{
+                c.innerHTML="Press Enter to Begin.";
+                document.addEventListener("keypress",e=>{
+                    if(key.match(e.key)&&working){
+                        if(score==-1){
+                            time=Date.now();
+                        }
+                        score++;
+                        if(score==length){
+                            score=-1;
+                            c.innerHTML=`You completed ${length} key presses in ${(Date.now()-time)/1000} seconds.\nPress any key to play again.`
+                            key="Enter";
+                        } else html();
+                    } else if(score!=length){
+                        working=false;
+                        c.innerHTML=`<img src="assets/${key}w.png">`;
+                        setTimeout(()=>{
+                            working=true;
+                            html();
+                        },1000);
+                    }
+                });
+            };
+        </script>
+    </head>
+    <body>
+        <div id="c"></div>
+    </body>
+</html>
