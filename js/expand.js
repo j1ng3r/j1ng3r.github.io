@@ -1,3 +1,6 @@
+Object.assign(Boolean,{
+    random:v=>Math.random()<v
+});
 Object.assign(String,{
     reverse(s){
         return s.split('').reverse().join('');
@@ -42,6 +45,9 @@ Object.assign(Array,{
     repeat(e,n){
     	for(var a=[],i=0;i<n;i++)a.push(e);
     	return a;
+    },
+    map(f,n){
+        return new Array(n).map((v,i)=>f(i));
     }
 });
 Object.assign(Number,{
@@ -49,7 +55,7 @@ Object.assign(Number,{
     decimalCharacters:"0123456789",
     hexCharacters:"0123456789ABCDEF",
     requirePositiveInteger(n){
-        n=+n;
+        n=Number.eval(n);
         if(Number.isInteger(n)&&n>0){
             return n;
         } else throw new TypeError("Input must be a positive integer.");
@@ -59,7 +65,8 @@ Object.assign(Number,{
     }
 });
 Object.assign(Math,{
-    rand(a,b){return arguments.length?(a&&a.length)?a[Math.floor(Math.random()*a.length)]:Number.eval(a)+(Number.eval(b)-Number.eval(a))*Math.random():Math.random();},
+    TAU:2*Math.PI,
+    rand(a,b){return arguments.length?Array.isArray(a)?a[Math.floor(Math.random()*a.length)]:Number.eval(a)+(Number.eval(b)-Number.eval(a))*Math.random():Math.random();},
     sq(a){return a*a;},
     mod(a,b){return a-b*Math.floor(a/b);},
     factor(n){

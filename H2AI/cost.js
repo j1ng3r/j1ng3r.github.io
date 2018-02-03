@@ -1,11 +1,11 @@
 CONFIG={
-    rate:1,
-    eff:0.001,
-    time:0.001,
-    weight:1,
-    mcost:0.001,
-    ocost:0.1,
-    size:1
+    rate:0.01,
+    eff:1,
+    time:0.01,
+    weight:0.01,
+    mcost:0.005,
+    ocost:0.005,
+    size:0.01
 };
 
 C={
@@ -21,13 +21,13 @@ for(let i in C)
     C[i]*=CONFIG[i];
 
 thresh={
-    size:1000,
-    mcost:100000,
-    ocost:1/605,
+    rate:0.02,
+    eff:0.8,
+    time:1800,
     weight:10000,
-    time:1,
-    eff:0.001,
-    rate:0.04
+    mcost:1000,
+    ocost:10,
+    size:3000
 };
 function Thresh(x){
     return(x-Math.sqrt(x*x+1))||0;
