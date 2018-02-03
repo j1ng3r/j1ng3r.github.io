@@ -1,10 +1,10 @@
 CONFIG={
     rate:1,
-    eff:0.001,
-    time:0.001,
-    weight:1,
-    cost:0.001,
-    size:1
+    eff:0.1,
+    time:0.1,
+    weight:0.1,
+    cost:0,
+    size:0.1
 };
 
 C={
@@ -16,12 +16,12 @@ C={
     cost:-CONFIG.cost
 };
 thresh={
-    size:1000,
-    cost:10000,
-    weight:10000,
-    time:1,
-    eff:0.001,
-    rate:0.04
+    size:1500,
+    cost:100,
+    weight:5000,
+    time:3600,
+    eff:0.8,
+    rate:0.01
 };
 function Thresh(x){
     return(x-Math.sqrt(x*x+1))||0;

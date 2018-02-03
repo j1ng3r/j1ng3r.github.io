@@ -113,16 +113,66 @@ function Simulate(I){
     };
     return ret;
 }
-args=[
-    "voltage",
-
-    "plate_dist",
-    "plate_width",
-    "plate_length",
-    "plate_height",
-    "plate_material",
-    "water_weight"
-];
+argprops={
+    "voltage":{
+        minVal:1.48,
+        maxValSoft:10,
+        maxMut:0.1,
+        returnFunc:_=>math.unit(_,"V")
+    },
+    "plate_dist":{
+        minValSoft:-5,
+        maxValSoft:5,
+        maxMut:0.5,
+        returnFunc:_=>math.unit(Math.exp(_),"mm")
+    },
+    "plate_width":{
+        minVal:0,
+        maxValSoft:5,
+        maxMut:0.5,
+        returnFunc:_=>math.unit(Math.exp(_),"mm")
+    },
+    "plate_length":{
+        minVal:0,
+        maxValSoft:11,
+        maxMut:0.5,
+        returnFunc:_=>math.unit(Math.exp(_),"mm")
+    },
+    "plate_height":{
+        minVal:0,
+        maxValSoft:9,
+        maxMut:0.5,
+        returnFunc:_=>math.unit(Math.exp(_),"mm")
+    },
+    "plate_material":{
+        array:Object.keys(K.MAT)
+    },
+    "number_of_plates":{
+        array:[2]
+    },
+    "electrolyte_name":{
+        array:["Na2CO3"]
+    },
+    "percentMass":{
+        minVal:0,
+        maxValSoft:0.1,
+        maxVal:1,
+        maxMut:0.01
+    },
+    "temperature":{
+        minVal:50,
+        maxVal:180,
+        maxMut:10,
+        returnFunc:_=>math.eval(_+"degF to K")
+    },
+    "water_weight":{
+        minValSoft:3,
+        maxValSoft:13,
+        maxMut:0.5,
+        returnFunc:_=>math.unit(Math.exp(_),"g")
+    }
+}
+args=Object.keys(argprops);
 
 
 
