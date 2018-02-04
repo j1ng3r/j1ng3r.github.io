@@ -1,18 +1,26 @@
 function Do(a){
-    var o={},i;
-    for(i in a)
-        o[args[i]]=a[i];
-    return Simulate(o);
-}
-function DO(...a){
-    var A=Do(a);
+    var o={};
+    a.forEach((v,i)=>o[args[i]]=v);
+    var A=Simulate(o);
     if(window.Cost)
         return Cost(A);
     return-Util(A);
 }
-Input=[];
-ai=new AI;
-//
+ai=new AI({
+    iterationCount:30,
+    geneCount:50
+},{
+    getDNAValue:args.map(k=>argprops[k].array?(v=>argprops[k].array[Math.floor(v)]):argprops[k].returnFunc),
+    minValue:args.map(k=>argprops[k].array?0:argprops[k].minVal),
+    maxValue:args.map(k=>argprops[k].array?argprops[k].array.length-0.01:argprops[k].maxVal)
+},{
+    minValueSoft:args.map(k=>argprops[k].minValSoft),
+    maxValueSoft:args.map(k=>argprops[k].maxValSoft),
+    maxMut:args.map(k=>argprops[k].array?argprops[k].array.length-0.01:argprops[k].maxValSoft),
+    epsilon:0.00001
+},Do,args.length);
+ai.execute();
+/*
 ai
     .defineGeneCount(60)
     .defineIterations(600)
@@ -52,3 +60,4 @@ ai
     .execute(console.time())
 ;
 console.timeEnd();
+*/

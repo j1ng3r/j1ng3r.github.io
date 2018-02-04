@@ -47,7 +47,7 @@ Object.assign(Array,{
     	return a;
     },
     map(f,n){
-        return new Array(n).map((v,i)=>f(i));
+        return new Array(n).fill(undefined).map((v,i)=>f(i));
     }
 });
 Object.assign(Number,{
@@ -87,6 +87,12 @@ Object.assign(Math,{
     },
     factorial(n){
         return!Math.mod(n,1)&&n>0?n*Math.factorial(n-1):1;
+    },
+    min_(...a){
+        return Math.min.apply(Math,a.filter(v=>!isNaN(v)));
+    },
+    max_(...a){
+        return Math.max.apply(Math,a.filter(v=>!isNaN(v)));
     }
 });
 Object.assign(console,{

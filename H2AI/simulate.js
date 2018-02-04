@@ -1,6 +1,6 @@
 function Simulate(I){
-    //Defining some preliminary, independant things
-    var O=Object.deepCopy(I);
+    //Defining some preliminary, independent things
+    var O=Object.deepCopy(I);console.log(O);
     O.electrolyte_weight=math.divide(O.water_weight,1/O.percentMass-1);
     O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
     O.getGasDensity=_=>math.divide(K.mass("2H2O"),math.multiply(3,O["L/mol"](_)));
@@ -165,7 +165,7 @@ argprops={
         minVal:50,
         maxVal:180,
         maxMut:10,
-        returnFunc:_=>math.eval(_+"degF to K")
+        returnFunc:_=>math.eval(_+" degF to K")
     },
     "water_weight":{
         minVal:0,

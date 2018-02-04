@@ -58,23 +58,31 @@ AI=function(){
     class Organism{
         /*
             argument order:
-            fn,ai,Q,q,B,R,P,f,dna,v,k,N,food,oldcost,t
+            a,fn,ai,Q,q,B,R,P,f,dna,v,k,N,food,oldcost,t
         */
         constructor(ai,P,dna,food,oldcost){
+            this.isDead=false;
             this.ai=ai;
             this.oldcost=oldcost;
             this.f=ai.f;
             this.P=Object.deepCopy(P);
-            this.dna=Organism.createDNA(dna);
+            this.dna=Organism.createDNA(ai.R,dna);
+            for(let i=0;i<this.dna.length;i++){
+                if(isNaN(this.dna[i])){
+                    this.kill();
+                    return;
+                }
+            }
             this.food=0;
             this.feed(food);
             this.test();
         }
         test(){
+            console.log(this);
             let e=this.P.epsilon;
-            this.d=[this.cost=this.f(this.DNA)];
-            this.grad=this.dna.map((v,i)=>(this.f(this.dna.map((w,j)=>w+(i==j?e:0)))-Q.d0)/e);
-            this.gradmag=this.grad.magnitude;
+            this.d=[this.cost=this.f(this.dna)];
+            this.grad=this.dna.map((v,i)=>(this.f(this.dna.map((w,j)=>w+(i==j?e:0)))-this.d[0])/e);
+            this.gradmag=Math.sqrt(this.grad.reduce((a,v)=>a+v*v,0));
             this.gradnorm=this.grad.map(v=>v/this.gradmag);
             this.d[1]=this.gradmag;
             this.pt=t=>this.dna.map((v,i)=>v+t*this.gradnorm[i]);
@@ -89,7 +97,7 @@ AI=function(){
             return this;
         }
         giveFoodTo(Q,food){
-            food=Math.max(this.food,food);
+            food=Math.min(this.food,food);
             Q.feed(food);
             this.starve(food);
             return this;
@@ -119,7 +127,8 @@ AI=function(){
             return this.reproduce(dna,this.P.altruism);
         }
         step(){
-            this.searches().map(v=>this.reproduceNormal(this.pf(v)));
+            if(this.isDead)return this;
+            this.searches().map(v=>this.reproduceNormal(this.pt(v)));
             Array.map(()=>{
                 if(Boolean.random(this.P.resetProb))this.reproduceNormal(Organism.generateRandomDNA(this.P,this.dna.length))
             },this.P.resets);
@@ -128,19 +137,26 @@ AI=function(){
             },this.P.muts);
             return this;
         }
+        kill(){
+            console.log("sdofih");
+            this.isDead=true;
+            this.ai.kill(this);
+        }
     }
     Object.assign(Organism,{
         createDNA(R,dna){
             return dna.map((v,k)=>Math.min(R.maxValue[k],Math.max(R.minValue[k],v)));
         },
         generateRandomValue(P,k){
-            return Math.rand(Number.eval(P.minValueSoft[k]),Number.eval(P.maxValueSoft[k]));
+            let value=Math.rand(P.minValueSoft[k],P.maxValueSoft[k]);
+            return value;
         },
         generateRandomDNA(P,N){
-            return Array.map((v,k)=>Organism.generateRandomValue(P,k),N);
+            return Array.map(k=>Organism.generateRandomValue(P,k),N);
         },
         mutateValue(P,v,k){
-            return v+Math.rand(-1,1)*P.learningrate*P.maxMut[k];
+            let value=v+Math.rand(-1,1)*P.learningrate*P.maxMut[k];
+            return value;
         },
         generateNewValue(P,v,k){
             return Boolean.random(P.resetProb)?Organism.generateRandomValue(P,k):Organism.mutateValue(P,v,k);
@@ -150,11 +166,12 @@ AI=function(){
             let a=Organism.createDNA(R,dna);
             let K=Array.map(i=>i==k,dna.length);
             a[k]=Organism.generateNewValue(P,dna[k],k);
-            while(Boolan.random(P.mutProb)&&K.length<dna.length){
+            while(Boolean.random(P.mutProb)&&K.length<dna.length){
                 k=~~Math.rand(dna.length);
                 if(!K[k]){
                     K[k]=true;
                     a[k]=Organism.generateNewValue(P,dna[k],k);
+                    
                 }
             }
             return a;
@@ -164,16 +181,18 @@ AI=function(){
         }
     });
     class AI{
-        constructor(B,R,P,f){
+        constructor(B,R,P,f,N){
             this.R=Object.assign({
                 stipend:M=>10-Math.floor(Math.sqrt(2*M+1/4)-1/2),
                 maxFood:40,
                 hunger:1,
                 costgain:2,
-                carrot:Δcost=>Δcost*this.R.costgain,
+                carrot:Acost=>-Acost*this.R.costgain,
             },R);
-            this.R.names=R.names||Array.map(i=>i,R.maxValue.length);
+            this.N=N;
+            this.R.names=this.map(this.R.names,(v,i)=>v!==undefined?v:i);
             this.B=Object.assign({
+                iterationCount:30,
                 organismCount:44
             },B);
             this.P=Object.assign({
@@ -182,12 +201,24 @@ AI=function(){
                 resetProb:0.8,
                 resets:1,
                 muts:4,
-                altruism:2
+                altruism:2,
+                learningrate:0.5
             },P);
-            this.N=this.R.names.length;
             this.population=[];
             this.DEBUG=false;
             this.defineCostFunction(f);
+        }
+        kill(Q){
+            for(let i=0;i<this.population.length;i++){
+                if(this.population[i]==Q){
+                    this.population.splice(i,1);
+                    return;
+                }
+            }
+        }
+        map(a,fn){
+            if(!Array.isArray(a))return Array.map(i=>fn(undefined,i),this.N);
+            return a.map(fn);
         }
         defineCostFunction(f){
             this._f=f;
@@ -203,18 +234,28 @@ AI=function(){
             this.N=N;
         }
         addOrganism(Q){
-            this.population.push(Q);
+            if(Q.isDead){console.log(Q);debugger;}
+            if(!Q.isDead)this.population.push(Q);
             return this;
         }
-        step(){
-            //Stepping each Q
+        stepPopulation(){
             this.population.forEach(Q=>Q.step());
-
-            //Resetting food
-            this.population.sort((Q,q)=>Q.food-q.food);
+            return this;
+        }
+        sortPopulation(){
+            this.population.sort((Q,q)=>Q.cost-q.cost);
+            return this;
+        }
+        cleanPopulation(){
+            this.population.forEach(Q=>Q.food=Math.max(0,Math.min(this.R.maxFood,Q.food)));
+            return this;
+        }
+        feedPopulation(){
             for(let M=0;M<this.population.length;){
                 let Q=this.population[M];
-                Q.food=Math.max(0,Math.min(this.R.maxFood,food+Math.floor(this.R.stipend(Q.index=M))-this.R.hunger));
+                //console.log(this.R.maxFood,Q.food,this.R.stipend(M),this.R.hunger);
+                Q.food=Math.max(0,Math.min(this.R.maxFood,Q.food+Math.floor(this.R.stipend(Q.index=M))-this.R.hunger));
+
                 if(Q.food===0){
                     this.population.splice(M,1);
                 } else {
@@ -223,22 +264,38 @@ AI=function(){
             }
             return this;
         }
+        step(){
+            return this.stepPopulation().sortPopulation().feedPopulation();
+        }
         stepN(n){
             Array.map(()=>this.step(),n);
             return this;
         }
-        init(){
-            this.R.getDNAValue.map(fn=>typeof fn=="function"?fn:v=>v);
-            this.R.minValue.map(w=>+w==w?+w:-Infinity);
-            this.R.maxValue.map(w=>+w==w?+w:Infinity);
-            this.P.minValueSoft.map((w,k)=>Math.max(Number.eval(w),this.R.minValue[k]));
-            this.P.maxValueSoft.map((w,k)=>Math.min(Number.eval(w),this.R.maxValue[k]));
-            this.population=Array.map(i=>Organism.generateRandomOrganism(this,this.P,Organism.generateRandomDNA(this.P,this.N),0,Infinity),this.B.organismCount);
+        formatValues(){
+            this.R.getDNAValue=this.map(this.R.getDNAValue,fn=>typeof fn=="function"?fn:v=>v);
+            this.R.minValue=this.map(this.R.minValue,w=>Math.max_(w,-Infinity));
+            this.R.maxValue=this.map(this.R.maxValue,w=>Math.min_(w,Infinity));
+            this.P.minValueSoft=this.map(this.P.minValueSoft,(w,k)=>Math.max_(w,this.R.minValue[k]));
+            this.P.maxValueSoft=this.map(this.P.maxValueSoft,(w,k)=>Math.min_(w,this.R.maxValue[k]));
+            this.P.maxMut=this.map(this.maxMut,(w,k)=>{
+                let value = Math.min_(w,this.P.maxValueSoft[k]-this.P.minValueSoft[k]);
+                return value||1;
+            });
             return this;
         }
+        initPopulation(){
+            this.population=Array.map(i=>Organism.generateRandomOrganism(this,this.P,this.N,0,Infinity),this.B.organismCount);
+            this.cleanPopulation();
+            return this;
+        }
+        init(){
+            return this.formatValues().initPopulation();
+        }
         execute(){
-            this.init();
-            return this.stepN(this.iterationCount);
+            return this.init().stepAll();
+        }
+        stepAll(){
+            return this.stepN(this.B.iterationCount);
         }
         runFunction(fn){
             fn();
@@ -531,17 +588,8 @@ AI=function(){
 new AI({},{
     maxVal:[10,10],
     minVal:[-10,-10]
-},{})
-    .defineCostFunction(function(X){
-        let a=20,b=0.2,c=Math.TAU;
-        return -a*Math.exp(-b*Math.sqrt(X.reduce((a,v)=>a+v*v/X.length,0))
-    })
-    .
-/**/
-new AI({},{
-    maxVal:[10,10],
-    minVal:[-10,-10]
 },{},function(X){
     let a=20,b=0.2,c=Math.TAU;
     return -a*Math.exp(-b*Math.sqrt(X.reduce((a,v)=>a+v*v/X.length,0)))-Math.exp(X.reduce((a,v)=>a+Math.cos(c*v)/X.length))+a+Math.exp(1);
 }).execute();
+/**/
