@@ -1,11 +1,10 @@
 function Simulate(I){
     //Defining some preliminary, independent things
-    var O=Object.deepCopy(I);console.log(O);
+    var O=Object.deepCopy(I);
+    O.water_weight=math.add(O.xtra_water_weight,math.multiply(O.plate_dist,O.plate_length,O.plate_height,K.d.H2O));
     O.electrolyte_weight=math.divide(O.water_weight,1/O.percentMass-1);
     O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
     O.getGasDensity=_=>math.divide(K.mass("2H2O"),math.multiply(3,O["L/mol"](_)));
-    O.xtra_water_weight=math.subtract(O.water_weight,math.multiply(O.plate_dist,O.plate_length,O.plate_height,K.d.H2O));
-    if(O.xtra_water_weight.toNumber()<0)O.xtra_water_weight=math.unit("0 g");
     //Getting the material properties
     O.mat=K.MAT[O.plate_material];
 
@@ -159,7 +158,7 @@ argprops={
         minVal:0,
         maxValSoft:0.1,
         maxVal:1,
-        maxMut:0.01
+        maxMut:0.2
     },
     "temperature":{
         minVal:50,
@@ -167,7 +166,7 @@ argprops={
         maxMut:10,
         returnFunc:_=>math.eval(_+" degF to K")
     },
-    "water_weight":{
+    "xtra_water_weight":{
         minVal:0,
         minValSoft:3,
         maxValSoft:13,

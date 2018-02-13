@@ -48,6 +48,11 @@ Object.assign(Array,{
     },
     map(f,n){
         return new Array(n).fill(undefined).map((v,i)=>f(i));
+    },
+    convertToObject(k,v){
+        let o={};
+        k.forEach((j,i)=>o[j]=v[i]);
+        return o;
     }
 });
 Object.assign(Number,{
