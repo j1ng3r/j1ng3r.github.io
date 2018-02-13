@@ -52,6 +52,7 @@ Terminology
     generateRandomOrganism(AI,P,N,food) = generates a new organism (giving it the arguments as properties), giving it food
     step() = how the organism and AI update
     population[] = the population of Organisms
+
 */
 AI=function(){
     class Organism{
@@ -61,9 +62,6 @@ AI=function(){
         */
         constructor(ai,P,dna,food,oldcost){
             this.isDead=false;
-            this.hasSearched=false;
-            this.children=[];
-            this.searchChildren=[];
             this.ai=ai;
             this.oldcost=oldcost;
             this.f=ai.f;
@@ -77,28 +75,22 @@ AI=function(){
             }
             this.food=0;
             this.feed(food);
-            this.testCost();
+            this.test();
         }
-        testCost(){
-            this.d=[this.cost=this.f(this.dna)];
-            return this;
-        }
-        testGrad(){
+        test(){
+            console.log(this);
             let e=this.P.epsilon;
+            this.d=[this.cost=this.f(this.dna)];
             this.grad=this.dna.map((v,i)=>(this.f(this.dna.map((w,j)=>w+(i==j?e:0)))-this.d[0])/e);
             this.gradmag=Math.sqrt(this.grad.reduce((a,v)=>a+v*v,0));
             this.gradnorm=this.grad.map(v=>v/this.gradmag);
-            this.d[1]=-1;
-            this.pt=t=>this.dna.map((v,i)=>v-t*this.gradnorm[i]/this.gradmag);
+            this.d[1]=this.gradmag;
+            this.pt=t=>this.dna.map((v,i)=>v+t*this.gradnorm[i]);
             this.pf=t=>this.f(this.pt(t));
             this.e=[this.d[0],this.pf(e),this.pf(2*e),this.pf(3*e)];
             this.d.push((this.e[2]-2*this.e[1]+this.e[0])/e**2,(this.e[3]-3*this.e[2]+3*this.e[1]-this.e[0])/e**3);
             this.feed(this.ai.R.carrot(this.cost-this.oldcost));
             return this;
-        }
-        test(){
-            //this.ai.log(this);
-            return this.testCost().testGrad();
         }
         addToPopulation(){
             this.ai.addOrganism(this);
@@ -112,7 +104,6 @@ AI=function(){
         }
         starve(food){
             this.food-=Math.floor(Number.eval(food));
-            if(this.food<=0)this.kill();
             return this;
         }
         feed(food){
@@ -121,64 +112,35 @@ AI=function(){
         }
         searches(){
             return[
-                -this.d[1]/Math.abs(this.d[2])*this.P.learningrate,//Quadratic line search with learningrate
-                -(this.d[2]-Math.sqrt(this.d[2]**2-2*this.d[1]*this.d[3]))/this.d[3], //Cubic line search
-                -this.d[1]/Math.abs(this.d[2]),//Quadratic line search
+                -this.d[1]/Math.abs(this.d[2]),//Quadratic Newton's search
+                -this.d[1]/Math.abs(this.d[2])*this.P.learningrate,//Quadratic Newton's search with learningrate
+                -Math.sign(this.d[1])*this.P.learningrate, //Classic gradient descent: Non scale-invariant, possibly remove
+                -(this.d[2]-Math.sqrt(this.d[2]**2-2*this.d[1]*this.d[3]))/this.d[3],
                 -this.d[1]/Math.sqrt(this.d[2]**2+this.d[3]**2), //Non scale-invariant, possibly remove
-                this.P.learningrate,-this.P.learningrate //Gradient descent as a backup
-            ].filter(v=>+v);//Remove potential "undefined"s, "0"s, or "NaN"s
+                this.P.learningrate,-this.P.learningrate //As a backup
+            ].filter(v=>+v===v);//Remove potential "undefined"s or "NaN"s
         }
-        reproduce(dna,food,search){
-            if(this.isDead)return this;
-            for(let i=0;i<dna.length;i++){
-                if(isNaN(dna[i])){
-                    return this;
-                }
-            }
-            if(food<1)return this;
-            let Q=new Organism(this.ai,this.P,dna,0,this.cost);
-            if(search){
-                this.searchChildren.push(Q);
-            } else {
-                this.giveFoodTo(Q,food);
-                this.children.push(Q);
-                Q.addToPopulation();
-            }
-            return this;
+        reproduce(dna,food){
+            return this.giveFoodTo(new Organism(this.ai,this.P,dna,0,this.cost).addToPopulation(),food);
         }
-        reproduceNormal(dna,search){
-            //console.log(dna);
-            return this.reproduce(dna,this.P.altruism,search);
+        reproduceNormal(dna){
+            return this.reproduce(dna,this.P.altruism);
         }
         step(){
             if(this.isDead)return this;
-            if(!this.grad)this.testGrad();
-            //console.log(this);
-            if(!this.hasSearched){
-                this.hasSearched=true;
-                this.searches().map(v=>this.reproduceNormal(this.pt(v),1));
-                this.searchChildren.sort((Q,q)=>Q.cost-q.cost).filter((Q,i)=>i<this.ai.R.maxSearches).forEach(Q=>{
-                    this.children.push(Q);
-                    Q.addToPopulation();
-                    this.giveFoodTo(Q,this.P.altruism);
-                });
-                this.searchChildren=[];
-                //console.log(this.grad,this.children);
-            }
-            this.learningrate=5/(this.ai.generation+27)**0.33;
+            this.searches().map(v=>this.reproduceNormal(this.pt(v)));
             Array.map(()=>{
                 if(Boolean.random(this.P.resetProb))this.reproduceNormal(Organism.generateRandomDNA(this.P,this.dna.length))
-            },this.P.resets*(this.hasSearched+1));
+            },this.P.resets);
             Array.map(()=>{
                 if(Boolean.random(this.P.mutProb))this.reproduceNormal(Organism.mutateDNA(this.ai.R,this.P,this.dna));
-            },this.P.muts*(this.hasSearched+1));
-            //console.log(this.children);
+            },this.P.muts);
             return this;
         }
         kill(){
+            console.log("sdofih");
             this.isDead=true;
             this.ai.kill(this);
-            return this;
         }
     }
     Object.assign(Organism,{
@@ -209,6 +171,7 @@ AI=function(){
                 if(!K[k]){
                     K[k]=true;
                     a[k]=Organism.generateNewValue(P,dna[k],k);
+                    
                 }
             }
             return a;
@@ -219,32 +182,29 @@ AI=function(){
     });
     class AI{
         constructor(B,R,P,f,N){
-            this.generation=0;
             this.R=Object.assign({
-                maxSearches:1,
-                stipend:M=>6-Math.floor(Math.sqrt(2*M+1/4)-1/2),
-                maxFood:10,
-                hunger:2,
-                costgain:6,
+                stipend:M=>10-Math.floor(Math.sqrt(2*M+1/4)-1/2),
+                maxFood:40,
+                hunger:1,
+                costgain:2,
                 carrot:Acost=>-Acost*this.R.costgain,
             },R);
             this.N=N;
             this.R.names=this.map(this.R.names,(v,i)=>v!==undefined?v:i);
             this.B=Object.assign({
-                iterationCount:5,
-                organismCount:30
+                iterationCount:30,
+                organismCount:44
             },B);
             this.P=Object.assign({
                 epsilon:0.0001,
-                mutProb:0.3,
-                resetProb:0.01,
+                mutProb:0.25,
+                resetProb:0.8,
                 resets:1,
-                muts:3,
-                altruism:3,
+                muts:4,
+                altruism:2,
                 learningrate:0.5
             },P);
             this.population=[];
-            this.newPopulation=[];
             this.DEBUG=false;
             this.defineCostFunction(f);
         }
@@ -274,12 +234,8 @@ AI=function(){
             this.N=N;
         }
         addOrganism(Q){
-            if(!Q.isDead)this.newPopulation.push(Q);
-            return this;
-        }
-        addNewPopulation(){
-            this.newPopulation.forEach(Q=>Q.food&&this.population.push(Q));
-            this.newPopulation=[];
+            if(Q.isDead){console.log(Q);debugger;}
+            if(!Q.isDead)this.population.push(Q);
             return this;
         }
         stepPopulation(){
@@ -299,6 +255,7 @@ AI=function(){
                 let Q=this.population[M];
                 //console.log(this.R.maxFood,Q.food,this.R.stipend(M),this.R.hunger);
                 Q.food=Math.max(0,Math.min(this.R.maxFood,Q.food+Math.floor(this.R.stipend(Q.index=M))-this.R.hunger));
+
                 if(Q.food===0){
                     this.population.splice(M,1);
                 } else {
@@ -308,31 +265,10 @@ AI=function(){
             return this;
         }
         step(){
-            return this
-                //.runFunction(()=>console.error("Next Population",this.population.map(Q=>new Object({food:Q.food,cost:Q.cost}))))
-                .runFunction(()=>console.error("Generation:",this.generation,"Population:",this.population.map(Q=>new Object({food:Q.food,cost:Q.cost,dna:readDNA(Q.dna.map(v=>v)),grad:(Q.grad||[]).map(v=>v),gradnorm:(Q.gradnorm||[]).map(v=>v)})),"Lowest Cost",this.population.reduce((a,Q)=>Math.min(a,Q.cost),Infinity)))
-                .stepPopulation().sortPopulation().feedPopulation().addNewPopulation().runFunction(()=>this.generation++);
+            return this.stepPopulation().sortPopulation().feedPopulation();
         }
         stepN(n){
             Array.map(()=>this.step(),n);
-            return this;
-        }
-        stepPerfect(n,iterationCount=100){
-            let cost=Infinity;
-            let count=0;
-            for(let i=0;i<iterationCount;i++){
-                this.step();
-                let newCost=this.population.reduce((a,Q)=>Math.min(a,Q.cost),Infinity);
-                if(Math.abs(cost-newCost)<Number.EPSILON){
-                    count++;
-                } else {
-                    count=0;
-                }
-                if(count>=n){
-                    return this;
-                }
-                cost=newCost;
-            }
             return this;
         }
         formatValues(){
