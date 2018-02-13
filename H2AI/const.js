@@ -52,7 +52,8 @@ K={
             anode:"4e-5 ohm m^2",//false
         }
     },
-    mass(){
+    mass(formula){
+        if(formula=="Na2CO3")return math.unit(105.9888,"g/mol");
         return math.unit(36.03056,"g/mol");
     },
     cost:{

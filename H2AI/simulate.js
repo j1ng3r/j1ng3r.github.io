@@ -2,7 +2,9 @@ function Simulate(I){
     //Defining some preliminary, independent things
     var O=Object.deepCopy(I);
     O.water_weight=math.add(O.xtra_water_weight,math.multiply(O.plate_dist,O.plate_length,O.plate_height,K.d.H2O));
-    O.electrolyte_weight=math.divide(O.water_weight,1/O.percentMass-1);
+    O.water_volume=math.divide(O.xtra_water_weight,K.d.H2O);
+    O.electrolyte_weight=math.multiply(O.molarity,O.water_volume,K.mass(O.electrolyte_name));
+    O.percentMass=math.divide(O.electrolyte_weight,math.add(O.electrolyte_weight,O.water_weight));
     O["L/mol"]=T=>math.divide(math.multiply(math.gasConstant,T),math.unit("1 atm"));
     O.getGasDensity=_=>math.divide(K.mass("2H2O"),math.multiply(3,O["L/mol"](_)));
     //Getting the material properties
@@ -29,7 +31,7 @@ function Simulate(I){
     //The maximum outflow of hydrogen in grams per second (proof below)
     O.maxFlow=math.multiply(O.plate_dist,O.plate_length,math.sqrt(O.plate_height),K.maxFlow);
     //*/
-
+    
     O.cathodeR=math.divide(O.mat.cathode,O.plate_area);
     O.anodeR=math.divide(O.mat.anode,O.plate_area);
     //resistance of a single plate, assuming 2 plates
@@ -94,7 +96,7 @@ function Simulate(I){
 
     //Calculating size
     O.system_width=math.add(math.multiply(O.plate_dist,O.number_of_plates-1),math.multiply(O.plate_width,O.number_of_plates));
-    O.water_size=math.multiply(math.pow(math.divide(O.xtra_water_weight,K.d.H2O),1/3),3);
+    O.water_size=math.multiply(math.pow(O.water_volume,1/3),3);
     O.size=math.add(O.system_width,O.plate_length,O.plate_height);
 
     //Cleaning and parsing O
@@ -154,11 +156,12 @@ argprops={
     "electrolyte_name":{
         array:["Na2CO3"]
     },
-    "percentMass":{
+    "molarity":{
         minVal:0,
-        maxValSoft:0.1,
-        maxVal:1,
-        maxMut:0.2
+        maxValSoft:2,
+        maxVal:2.9,//at 25C, greater for higher temperatures, will need to revisit [Haynes, W.M. (ed.) CRC Handbook of Chemistry and Physics. 91st ed. Boca Raton, FL: CRC Press Inc., 2010-2011, p. 4-89]
+        matMut:1,
+        returnFunc:_=>math.unit(_,"mol / L")
     },
     "temperature":{
         minVal:50,
