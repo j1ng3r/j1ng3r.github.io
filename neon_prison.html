@@ -537,7 +537,8 @@ setInterval(function(){
     		}
     		if(p.y+v.y <= 0){
     			standing = true;
-    			p.y = 0-v.y;
+				p.y=0;
+				v.y=0;
     		} else {
     			standing = false;
     		}
