@@ -16,6 +16,7 @@ ai=new AI({
     maxSearches:1,
     muts:2,
     maxFood:7,
+    firstFood:1,
     getDNAValue:args.map(k=>argprops[k].array?(v=>argprops[k].array[Math.floor(v)]):argprops[k].returnFunc),
     minValue:args.map(k=>argprops[k].array?0:argprops[k].minVal),
     maxValue:args.map(k=>argprops[k].array?argprops[k].array.length-0.01:argprops[k].maxVal)
@@ -27,8 +28,11 @@ ai=new AI({
     maxMut:args.map(k=>argprops[k].array?argprops[k].array.length-0.01:argprops[k].maxValSoft),
     epsilon:0.00001
 },Do,args.length);
+let Time=[];
+let Cost=[];
 ai.init().stepPerfect(10,20);
-console.log(Array.convertToObject(["Cost"].concat(args),[ai.population[0].cost].concat(ai.population[0].dna.map((v,k)=>ai.R.getDNAValue[k](v)+""))));
+logbest=()=>console.log(Array.convertToObject(["Cost"].concat(args),[ai.population[0].cost].concat(ai.population[0].dna.map((v,k)=>ai.R.getDNAValue[k](v)+""))));
+logbest();
 /*
 ai
     .defineGeneCount(60)

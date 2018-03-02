@@ -93,7 +93,11 @@ AI=function(){
             this.pf=t=>this.f(this.pt(t));
             this.e=[this.d[0],this.pf(e),this.pf(2*e),this.pf(3*e)];
             this.d.push((this.e[2]-2*this.e[1]+this.e[0])/e**2,(this.e[3]-3*this.e[2]+3*this.e[1]-this.e[0])/e**3);
-            this.feed(this.ai.R.carrot(this.cost-this.oldcost));
+            if(isNaN(this.oldcost)){
+                this.feed(this.R.maxFood*this.R.firstFood);   
+            } else {
+                this.feed(this.ai.R.carrot(this.cost-this.oldcost));
+            }
             return this;
         }
         test(){
@@ -219,6 +223,7 @@ AI=function(){
     });
     class AI{
         constructor(B,R,P,f,N){
+            this.time=Date.now();
             this.generation=0;
             this.R=Object.assign({
                 maxSearches:1,
@@ -257,8 +262,7 @@ AI=function(){
             }
         }
         map(a,fn){
-            if(!Array.isArray(a))return Array.map(i=>fn(undefined,i),this.N);
-            return a.map(fn);
+            return Array.isArray(a)?a.map(fn):Array.map(i=>fn(undefined,i),this.N);
         }
         defineCostFunction(f){
             this._f=f;
@@ -287,7 +291,7 @@ AI=function(){
             return this;
         }
         sortPopulation(){
-            this.population.sort((Q,q)=>Q.cost-q.cost);
+            this.population.sort((Q,q)=>Q.cost-q.cost).splice(50);
             return this;
         }
         cleanPopulation(){
@@ -309,7 +313,6 @@ AI=function(){
         }
         step(){
             return this
-                //.runFunction(()=>console.error("Next Population",this.population.map(Q=>new Object({food:Q.food,cost:Q.cost}))))
                 .runFunction(()=>console.error("Generation:",this.generation,"Population:",this.population.map(Q=>new Object({food:Q.food,cost:Q.cost,dna:readDNA(Q.dna.map(v=>v)),grad:(Q.grad||[]).map(v=>v),gradnorm:(Q.gradnorm||[]).map(v=>v)})),"Lowest Cost",this.population.reduce((a,Q)=>Math.min(a,Q.cost),Infinity)))
                 .stepPopulation().sortPopulation().feedPopulation().addNewPopulation().runFunction(()=>this.generation++);
         }
@@ -317,10 +320,11 @@ AI=function(){
             Array.map(()=>this.step(),n);
             return this;
         }
-        stepPerfect(n,iterationCount=100){
+        stepPerfect(n,iterationCount=100,fn=I=>I){
             let cost=Infinity;
             let count=0;
             for(let i=0;i<iterationCount;i++){
+                fn(this);
                 this.step();
                 let newCost=this.population.reduce((a,Q)=>Math.min(a,Q.cost),Infinity);
                 if(Math.abs(cost-newCost)<Number.EPSILON){
