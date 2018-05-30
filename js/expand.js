@@ -31,15 +31,24 @@ Object.assign(Object,{
     defaultSetThat(o,v){
         for(var i in v)
             o[i]=v[i]||o[i];
+    },
+    forEach(o,fn){
+        Object.keys(o).forEach(v=>fn(o[v],v,o));
+    },
+    map(o,fn){
+        return Object.keys(o).reduce((a,v)=>Object.assign(a,{[v]:fn(o[v],v,o)}),{});
     }
 });
 Object.assign(Array,{
     level(a){
-    	if(typeof a!='object')
+        return Array.level(a);
+    },
+    flatten(a){
+        if(typeof a!='object')
     		return a;
     	var _=[],i;
     	for(i in a)
-    		_=_.concat(Array.level(a[i]));
+    		_=_.concat(Array.flatten(a[i]));
     	return _;
     },
     repeat(e,n){

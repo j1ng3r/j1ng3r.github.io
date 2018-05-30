@@ -1,0 +1,1 @@
+fibonacci=f=n=>n?(a=f(n-1))&&[...a,(a.pop()+a.pop())||1]:[]
