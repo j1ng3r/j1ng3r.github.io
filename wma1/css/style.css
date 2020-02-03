@@ -1,6 +1,6 @@
 @font-face {
 	font-family: 'Share Tech Mono';
-	src: url('/css/ShareTechMono-Regular.ttf');
+	src: url('css/ShareTechMono-Regular.ttf');
 }
 #gm-container {
 	text-align:center;
